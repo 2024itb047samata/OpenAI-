@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Clock,
   Database,
@@ -15,7 +15,21 @@ import {
   Cpu,
   Layers,
   Settings2,
-  BookOpen
+  BookOpen,
+  ChevronRight,
+  ChevronDown,
+  User,
+  FolderGit,
+  FileLock2,
+  Activity,
+  LogOut,
+  LayoutDashboard,
+  Menu,
+  X,
+  ExternalLink,
+  ShieldCheck,
+  PlusCircle,
+  Tag
 } from "lucide-react";
 
 // Types
@@ -36,13 +50,156 @@ import KnowledgeGraphView from "./components/KnowledgeGraphView";
 import InteractiveTimeline from "./components/InteractiveTimeline";
 import ConnectorIntegrations from "./components/ConnectorIntegrations";
 
+// Modular SaaS pages
+import LandingPage from "./components/LandingPage";
+import DashboardPage from "./components/DashboardPage";
+import EvidencePage from "./components/EvidencePage";
+import SettingsPage from "./components/SettingsPage";
+
+// High-fidelity markdown inline styles parser
+function renderInlineStyles(text: string) {
+  const parts: React.ReactNode[] = [];
+  let currentIndex = 0;
+  
+  while (currentIndex < text.length) {
+    const boldStart = text.indexOf("**", currentIndex);
+    const codeStart = text.indexOf("`", currentIndex);
+    
+    if (boldStart !== -1 && (codeStart === -1 || boldStart < codeStart)) {
+      if (boldStart > currentIndex) {
+        parts.push(text.substring(currentIndex, boldStart));
+      }
+      
+      const boldEnd = text.indexOf("**", boldStart + 2);
+      if (boldEnd !== -1) {
+        parts.push(
+          <strong key={`bold-${boldStart}`} className="font-bold text-slate-100 font-sans">
+            {text.substring(boldStart + 2, boldEnd)}
+          </strong>
+        );
+        currentIndex = boldEnd + 2;
+      } else {
+        parts.push("**");
+        currentIndex = boldStart + 2;
+      }
+    } else if (codeStart !== -1 && (boldStart === -1 || codeStart < boldStart)) {
+      if (codeStart > currentIndex) {
+        parts.push(text.substring(currentIndex, codeStart));
+      }
+      
+      const codeEnd = text.indexOf("`", codeStart + 1);
+      if (codeEnd !== -1) {
+        parts.push(
+          <code key={`code-${codeStart}`} className="bg-slate-900 border border-slate-800 text-indigo-300 px-1.5 py-0.5 rounded text-[10px] font-mono">
+            {text.substring(codeStart + 1, codeEnd)}
+          </code>
+        );
+        currentIndex = codeEnd + 1;
+      } else {
+        parts.push("`");
+        currentIndex = codeStart + 1;
+      }
+    } else {
+      parts.push(text.substring(currentIndex));
+      break;
+    }
+  }
+  
+  return parts.length > 0 ? parts : text;
+}
+
+// Markdown blocks parser component
+function MarkdownRenderer({ text }: { text: string }) {
+  const lines = text.split("\n");
+  
+  return (
+    <div className="space-y-3.5 font-mono text-[11px] text-slate-300 leading-relaxed">
+      {lines.map((line, lidx) => {
+        const trimmed = line.trim();
+        
+        // Headers (### or ##)
+        if (trimmed.startsWith("### ")) {
+          return (
+            <h4 key={lidx} className="text-xs font-bold text-indigo-400 font-sans tracking-wide mt-5 mb-2 uppercase border-b border-slate-900 pb-1 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+              {renderInlineStyles(trimmed.substring(4))}
+            </h4>
+          );
+        }
+        if (trimmed.startsWith("## ") || trimmed.startsWith("# ")) {
+          const content = trimmed.startsWith("## ") ? trimmed.substring(3) : trimmed.substring(2);
+          return (
+            <h3 key={lidx} className="text-sm font-bold text-slate-100 font-sans tracking-tight mt-6 mb-3 border-b border-slate-800 pb-1.5">
+              {renderInlineStyles(content)}
+            </h3>
+          );
+        }
+        
+        // Horizontal lines
+        if (trimmed === "---") {
+          return <hr key={lidx} className="border-slate-800/80 my-4" />;
+        }
+        
+        // Quotes / Blockquotes
+        if (trimmed.startsWith("> ")) {
+          return (
+            <blockquote key={lidx} className="border-l-2 border-indigo-500/40 bg-indigo-500/5 px-3 py-2.5 my-2.5 rounded-r-md text-slate-400 italic font-sans text-xs">
+              {renderInlineStyles(trimmed.substring(2))}
+            </blockquote>
+          );
+        }
+        
+        // Unordered List Items
+        if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+          return (
+            <div key={lidx} className="flex items-start gap-2.5 pl-3">
+              <span className="text-indigo-400 select-none mt-1 text-[9px]">••</span>
+              <span className="flex-1">{renderInlineStyles(trimmed.substring(2))}</span>
+            </div>
+          );
+        }
+
+        // Ordered List Items
+        const numMatch = trimmed.match(/^(\d+)\.\s(.*)/);
+        if (numMatch) {
+          return (
+            <div key={lidx} className="flex items-start gap-2.5 pl-3">
+              <span className="text-indigo-400 font-bold select-none text-[10px] mt-0.5">{numMatch[1]}.</span>
+              <span className="flex-1">{renderInlineStyles(numMatch[2])}</span>
+            </div>
+          );
+        }
+
+        // Empty spacer
+        if (trimmed === "") {
+          return <div key={lidx} className="h-1" />;
+        }
+        
+        // Default text line
+        return (
+          <p key={lidx} className="leading-relaxed">
+            {renderInlineStyles(line)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function App() {
   const [serverHealth, setServerHealth] = useState<"checking" | "online" | "offline">("checking");
   const [apiKeyActive, setApiKeyActive] = useState<boolean>(false);
   const [showKeyWarning, setShowKeyWarning] = useState<boolean>(false);
 
-  // Active view tabs: "timeline" (Forensic Time Machine) | "graph" (Semantic Graph) | "connectors" (Modular Connectors)
-  const [activeTab, setActiveTab] = useState<"timeline" | "graph" | "connectors">("timeline");
+  // Active view page state
+  const [currentPage, setCurrentPage] = useState<"landing" | "dashboard" | "repository" | "timeline" | "evidence" | "ask_ai" | "settings">("landing");
+
+  // Live GitHub integration state
+  const [isGitHubConnected, setIsGitHubConnected] = useState<boolean>(false);
+  const [githubUser, setGithubUser] = useState<any>(null);
+  const [customRepos, setCustomRepos] = useState<any[]>([]);
+  const [selectedCustomRepoId, setSelectedCustomRepoId] = useState<string | null>(null);
+  const [customEvents, setCustomEvents] = useState<any[]>([]);
 
   // Selection states
   const [scenarios] = useState<Scenario[]>(PRESET_SCENARIOS);
@@ -50,11 +207,18 @@ export default function App() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
+  // Toggle between preset scenarios vs live ingested repos
+  const [workspaceMode, setWorkspaceMode] = useState<"preset" | "live">("preset");
+
   // Custom User query states
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isReconstructing, setIsReconstructing] = useState<boolean>(false);
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [matchingEntities, setMatchingEntities] = useState<string[]>([]);
+  const [retrievedDocs, setRetrievedDocs] = useState<any[]>([]);
+
+  // Mobile sidebar visibility
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
   // Pipeline stages progress state
   const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>([
@@ -70,47 +234,232 @@ export default function App() {
   // Modular connectors state
   const [connectors, setConnectors] = useState<ModularConnector[]>(MODULAR_CONNECTORS);
 
-  // Check health on load
-  useEffect(() => {
-    async function checkHealth() {
-      try {
-        const res = await fetch("/api/health");
-        if (res.ok) {
-          const data = await res.json();
-          setServerHealth("online");
-          setApiKeyActive(data.hasApiKey);
-          if (!data.hasApiKey) {
-            setShowKeyWarning(true);
-          }
-        } else {
-          setServerHealth("offline");
+  // Check health & GitHub connection on load
+  const checkHealthAndAuth = async () => {
+    try {
+      const res = await fetch("/api/health");
+      if (res.ok) {
+        const data = await res.json();
+        setServerHealth("online");
+        setApiKeyActive(data.hasApiKey);
+        if (!data.hasApiKey) {
+          setShowKeyWarning(true);
         }
-      } catch (err) {
-        console.error("Backend health check failed:", err);
+      } else {
         setServerHealth("offline");
       }
+    } catch (err) {
+      console.error("Backend health check failed:", err);
+      setServerHealth("offline");
     }
-    checkHealth();
+
+    try {
+      const res = await fetch("/api/auth/github/user");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.authenticated) {
+          setGithubUser(data.user);
+          setIsGitHubConnected(true);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch github user info:", err);
+    }
+  };
+
+  const fetchCustomRepos = async () => {
+    try {
+      const res = await fetch("/api/repositories");
+      if (res.ok) {
+        const data = await res.json();
+        setCustomRepos(data);
+      }
+    } catch (err) {
+      console.error("Failed to load custom repos:", err);
+    }
+  };
+
+  useEffect(() => {
+    checkHealthAndAuth();
+    fetchCustomRepos();
+  }, []);
+
+  // Handle postMessage from OAuth popups
+  useEffect(() => {
+    const handleOAuthSuccess = (event: MessageEvent) => {
+      if (event.data?.type === "OAUTH_AUTH_SUCCESS") {
+        setGithubUser(event.data.user);
+        setIsGitHubConnected(true);
+        fetchCustomRepos();
+      }
+    };
+    window.addEventListener("message", handleOAuthSuccess);
+    return () => window.removeEventListener("message", handleOAuthSuccess);
   }, []);
 
   const currentScenario = scenarios.find((s) => s.id === selectedScenarioId) || scenarios[0];
-  const scenarioEvents = WORKFLOW_EVENTS[selectedScenarioId] || [];
-  const scenarioNodes = KNOWLEDGE_GRAPH_NODES[selectedScenarioId] || [];
-  const scenarioEdges = KNOWLEDGE_GRAPH_EDGES[selectedScenarioId] || [];
 
-  // Default select first event when scenario changes
+  // Dynamic Graph construction from real custom repository events
+  const customNodes = useMemo(() => {
+    if (!selectedCustomRepoId) return [];
+    const nodes: KnowledgeGraphNode[] = [
+      { id: "repo-root", label: selectedCustomRepoId, type: "service", group: "repository" }
+    ];
+    const addedIds = new Set<string>(["repo-root"]);
+
+    customEvents.forEach((evt) => {
+      if (evt.author && !addedIds.has(`author-${evt.author}`)) {
+        nodes.push({
+          id: `author-${evt.author}`,
+          label: `@${evt.author}`,
+          type: "author",
+          group: "authors"
+        });
+        addedIds.add(`author-${evt.author}`);
+      }
+
+      if (evt.type === "commit") {
+        const commitSha = evt.hash || evt.id;
+        const shortSha = commitSha.substring(0, 7);
+        if (!addedIds.has(`commit-${commitSha}`)) {
+          nodes.push({
+            id: `commit-${commitSha}`,
+            label: `Commit ${shortSha}`,
+            type: "commit",
+            group: "commits"
+          });
+          addedIds.add(`commit-${commitSha}`);
+        }
+      }
+
+      if (evt.type === "issue") {
+        const issueNum = evt.id;
+        if (!addedIds.has(issueNum)) {
+          nodes.push({
+            id: issueNum,
+            label: evt.title.split(":")[0],
+            type: "issue",
+            group: "issues"
+          });
+          addedIds.add(issueNum);
+        }
+      }
+
+      if (evt.type === "pr") {
+        const prNum = evt.id;
+        if (!addedIds.has(prNum)) {
+          nodes.push({
+            id: prNum,
+            label: evt.title.split(":")[0],
+            type: "pr",
+            group: "prs"
+          });
+          addedIds.add(prNum);
+        }
+      }
+    });
+
+    return nodes;
+  }, [selectedCustomRepoId, customEvents]);
+
+  const customEdges = useMemo(() => {
+    if (!selectedCustomRepoId) return [];
+    const edges: KnowledgeGraphEdge[] = [];
+    const addedAuthors = new Set<string>();
+
+    customEvents.forEach((evt) => {
+      if (evt.author) {
+        if (!addedAuthors.has(evt.author)) {
+          edges.push({
+            id: `edge-author-${evt.author}-repo`,
+            source: `author-${evt.author}`,
+            target: "repo-root",
+            relation: "contributes"
+          });
+          addedAuthors.add(evt.author);
+        }
+
+        if (evt.type === "commit") {
+          const commitSha = evt.hash || evt.id;
+          edges.push({
+            id: `edge-commit-${commitSha}-author`,
+            source: `author-${evt.author}`,
+            target: `commit-${commitSha}`,
+            relation: "authored"
+          });
+        }
+
+        if (evt.type === "issue") {
+          edges.push({
+            id: `edge-issue-${evt.id}-author`,
+            source: `author-${evt.author}`,
+            target: evt.id,
+            relation: "reported"
+          });
+        }
+
+        if (evt.type === "pr") {
+          edges.push({
+            id: `edge-pr-${evt.id}-author`,
+            source: `author-${evt.author}`,
+            target: evt.id,
+            relation: "opened"
+          });
+        }
+      }
+    });
+
+    return edges;
+  }, [selectedCustomRepoId, customEvents]);
+
+  // Determine active scenario data based on selection mode
+  const isLiveMode = workspaceMode === "live" && !!selectedCustomRepoId;
+  const scenarioEvents = isLiveMode ? customEvents : (WORKFLOW_EVENTS[selectedScenarioId] || []);
+  const scenarioNodes = isLiveMode ? customNodes : (KNOWLEDGE_GRAPH_NODES[selectedScenarioId] || []);
+  const scenarioEdges = isLiveMode ? customEdges : (KNOWLEDGE_GRAPH_EDGES[selectedScenarioId] || []);
+
+  // Fetch custom timeline events when repository selection changes
+  const fetchCustomTimeline = async (repoId: string) => {
+    try {
+      const [owner, repo] = repoId.split("/");
+      const res = await fetch(`/api/repositories/${owner}/${repo}/timeline`);
+      if (res.ok) {
+        const data = await res.json();
+        setCustomEvents(data);
+        if (data.length > 0) {
+          setSelectedEventId(data[0].id);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load custom repo timeline:", err);
+    }
+  };
+
   useEffect(() => {
-    if (scenarioEvents.length > 0) {
+    if (selectedCustomRepoId) {
+      fetchCustomTimeline(selectedCustomRepoId);
+    }
+    setAiAnswer(null);
+    setSearchQuery("");
+    setMatchingEntities([]);
+    setRetrievedDocs([]);
+    resetPipeline();
+  }, [selectedCustomRepoId]);
+
+  // Default select first event when scenario changes (in preset mode)
+  useEffect(() => {
+    if (!isLiveMode && scenarioEvents.length > 0) {
       setSelectedEventId(scenarioEvents[0].id);
     }
-    if (scenarioNodes.length > 0) {
+    if (!isLiveMode && scenarioNodes.length > 0) {
       setSelectedNodeId(scenarioNodes[0].id);
     }
     setAiAnswer(null);
     setSearchQuery("");
     setMatchingEntities([]);
+    setRetrievedDocs([]);
     resetPipeline();
-  }, [selectedScenarioId]);
+  }, [selectedScenarioId, workspaceMode]);
 
   const resetPipeline = () => {
     setPipelineStages((prev) =>
@@ -120,22 +469,50 @@ export default function App() {
     setIsReconstructing(false);
   };
 
-  const handleToggleConnector = (connectorId: string, fields: Record<string, string>) => {
-    setConnectors((prev) =>
-      prev.map((c) => {
-        if (c.id === connectorId) {
-          const isEnabling = c.status !== "connected";
-          return {
-            ...c,
-            status: isEnabling ? "connected" : "disconnected",
-            lastSync: isEnabling ? new Date().toISOString().replace("T", " ").substring(0, 19) + " UTC" : undefined,
-            ingestedCount: isEnabling ? 452 : 0,
-            webhookUrl: isEnabling ? `https://time-machine.api.io/webhooks/${c.id}` : undefined
-          };
-        }
-        return c;
-      })
-    );
+  const handleDisconnectGitHub = async () => {
+    try {
+      await fetch("/api/auth/github/logout", { method: "POST" });
+      setGithubUser(null);
+      setIsGitHubConnected(false);
+      fetchCustomRepos();
+      setSelectedCustomRepoId(null);
+      setWorkspaceMode("preset");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
+  const handleAddRepo = async (owner: string, repo: string) => {
+    const res = await fetch("/api/repositories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ owner, repo })
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Failed to add repository.");
+    }
+    const data = await res.json();
+    await fetchCustomRepos();
+    setSelectedCustomRepoId(data.repository.id);
+    setWorkspaceMode("live");
+    return data.repository;
+  };
+
+  const handleSaveApiKeyOnBackend = async (key: string) => {
+    try {
+      const res = await fetch("/api/settings/secret", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key })
+      });
+      if (res.ok) {
+        setApiKeyActive(true);
+        setShowKeyWarning(false);
+      }
+    } catch (err) {
+      console.error("Failed to save secret key on backend:", err);
+    }
   };
 
   // Perform forensic reconstruction
@@ -163,16 +540,16 @@ export default function App() {
       );
 
       // Sleep to simulate rapid pipeline parsing
-      await new Promise((resolve) => setTimeout(resolve, 350));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       setPipelineStages((prev) =>
         prev.map((s) => {
           if (s.id === stageId) {
             let metrics = "OK";
             if (stageId === "ingestion") metrics = `${scenarioEvents.length} events loaded`;
-            if (stageId === "extraction") metrics = `${scenarioEvents.reduce((acc, curr) => acc + curr.entities.length, 0)} nodes extracted`;
+            if (stageId === "extraction") metrics = `${scenarioEvents.reduce((acc, curr) => acc + (curr.entities?.length || 0), 0)} nodes extracted`;
             if (stageId === "graph") metrics = `${scenarioNodes.length} nodes connected`;
-            if (stageId === "vector") metrics = "12 text chunks indexed";
+            if (stageId === "vector") metrics = isLiveMode ? "Semantic context retrieved" : "12 text chunks indexed";
             if (stageId === "timeline") metrics = "Chronology locked";
             if (stageId === "llm") metrics = "Report generated";
 
@@ -188,34 +565,46 @@ export default function App() {
     // Highlight matching entities based on simple keyword intersections to make graph glow!
     const queryLower = queryText.toLowerCase();
     const matched = scenarioEvents
-      .flatMap((e) => e.entities)
+      .flatMap((e) => e.entities || [])
       .filter((ent) => queryLower.includes(ent.toLowerCase()) || ent.toLowerCase().includes(queryLower));
     setMatchingEntities(Array.from(new Set(matched)));
 
     // Try requesting actual Gemini AI models
+    if (isLiveMode) {
+      try {
+        const [owner, repo] = (selectedCustomRepoId || "").split("/");
+        const response = await fetch(`/api/repositories/${owner}/${repo}/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ queryText })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAiAnswer(data.text);
+          setMatchingEntities(data.matchingEntities || []);
+          setRetrievedDocs(data.retrievedDocuments || []);
+        } else {
+          throw new Error("Custom query endpoint failed.");
+        }
+      } catch (err) {
+        console.warn("Forensics API fail:", err);
+        setAiAnswer("### 🔍 Live Forensic Pipeline Warning\n\nNo active semantic index matches found for this repository, or the Google Gemini API key is unconfigured. Run the **Ingestion Pipeline** under the **Modular Connectors** tab to index the repository history!");
+      } finally {
+        setIsReconstructing(false);
+      }
+      return;
+    }
+
     try {
-      const systemInstruction = `
-You are the Knowledge Time Machine forensic AI analyzer.
-You help engineering teams understand "WHY" code changed rather than only "WHAT" changed.
-Below are the chronological Git/GitHub repository event files parsed for this scenario:
-${JSON.stringify(scenarioEvents, null, 2)}
-
-Provide a highly professional, scannable, Linear/Vercel-style technical audit report answering the user's specific query.
-Focus on:
-1. Identifying who introduced the changes, when, and under what issues or PR numbers.
-2. Explaining the underlying engineering reason/justification (the "Why").
-3. Breaking down any architectural side effects, test alerts, or cost budget impacts.
-4. Structuring your response with elegant markdown, emphasizing file diff blocks or lines where appropriate. Do not use generic answers; cite actual hashes and author names.
-`;
-
       const response = await fetch("/api/gemini/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: `USER QUERY: ${queryText}\nSCENARIO NAME: ${currentScenario.name}`,
-          systemInstruction,
+          systemInstruction: `You are the Knowledge Time Machine forensic AI analyzer. Explain the chronologies and underlying "Why" backdoors or regressions occurred based on WORKFLOW_EVENTS. Current: ${JSON.stringify(scenarioEvents, null, 2)}`,
           model: "gemini-3.5-flash",
-          temperature: 0.15
+          temperature: 0.1
         })
       });
 
@@ -227,7 +616,6 @@ Focus on:
       }
     } catch (err) {
       console.warn("Falling back to local forensic model:", err);
-      // Fallback local robust grounding text
       generateLocalFallbackAnswer(queryText);
     } finally {
       setIsReconstructing(false);
@@ -274,7 +662,6 @@ On July 4th, **alice_dev** discovered the active backdoor in production packages
 A development backdoor committed by **bob_ops** was administrative-merged into main by **dave_manager** to unlock the staging pipelines for a demo. This bypassed a critical CodeQL scan. Corrected by **alice_dev** in **9c2041e**.`);
       }
     } else {
-      // S3 sync
       setAiAnswer(`### 📂 S3 Storage Sync Cleanup Incident Report
 
 **1. Why was the function deleted?**
@@ -292,331 +679,528 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
     }
   };
 
+  // Render Full Screen Landing page first
+  if (currentPage === "landing") {
+    return (
+      <LandingPage
+        onLaunch={() => setCurrentPage("dashboard")}
+        serverHealth={serverHealth}
+        apiKeyActive={apiKeyActive}
+      />
+    );
+  }
+
+  // Sidebar Menu Definitions
+  const navigationItems = [
+    { id: "dashboard", label: "Overview Hub", icon: <LayoutDashboard size={13} /> },
+    { id: "repository", label: "Repo Integrations", icon: <FolderGit size={13} /> },
+    { id: "timeline", label: "Incident Timeline", icon: <Clock size={13} /> },
+    { id: "evidence", label: "Forensic Evidence", icon: <FileLock2 size={13} /> },
+    { id: "ask_ai", label: "Ask Forensic AI", icon: <Sparkles size={13} /> },
+    { id: "settings", label: "Workspace Settings", icon: <Settings2 size={13} /> }
+  ] as const;
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500/30 selection:text-white" id="time-machine-cockpit">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans selection:bg-indigo-500/30 selection:text-white" id="main-saas-container">
       
-      {/* Top Professional Navigation Header */}
-      <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 px-6 py-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-600/10 border border-indigo-500/20 rounded-xl text-indigo-400">
-            <Clock className="w-5.5 h-5.5 animate-pulse" />
-          </div>
-          <div>
+      {/* 1. LEFT SIDEBAR PANEL */}
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-slate-900 bg-slate-950/90 p-5 flex flex-col justify-between shrink-0 transition-transform md:translate-x-0 md:static ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="space-y-6">
+          {/* Brand header */}
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h1 className="text-sm font-bold tracking-tight text-slate-100">Knowledge Time Machine</h1>
-              <span className="text-[9px] font-mono bg-indigo-500/15 border border-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded font-bold">
-                FORENSIC ENGINE v1.4
+              <div className="p-1.5 bg-indigo-500/15 border border-indigo-500/25 rounded-lg text-indigo-400">
+                <Clock className="w-4.5 h-4.5 animate-pulse" />
+              </div>
+              <div className="text-left">
+                <h1 className="text-xs font-bold tracking-tight text-white font-display uppercase">
+                  Chronos Forensics
+                </h1>
+                <span className="text-[8px] font-mono text-slate-500 uppercase">Forensic Core v1.5</span>
+              </div>
+            </div>
+            
+            {/* Mobile close button */}
+            <button className="md:hidden p-1 text-slate-500 hover:text-slate-300" onClick={() => setIsSidebarOpen(false)}>
+              <X size={15} />
+            </button>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="space-y-1.5 pt-4">
+            {navigationItems.map((item) => {
+              const isActive = currentPage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setCurrentPage(item.id);
+                    setIsSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 font-extrabold shadow-[0_0_10px_rgba(99,102,241,0.05)]"
+                      : "border border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-900/50"
+                  }`}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 ml-auto animate-pulse" />}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Sidebar Footer details */}
+        <div className="space-y-4 border-t border-slate-900 pt-5">
+          {/* Active GitHub session */}
+          {isGitHubConnected ? (
+            <div className="flex items-center justify-between p-2 bg-slate-900/40 rounded-lg border border-slate-900">
+              <div className="flex items-center gap-2 min-w-0">
+                {githubUser?.avatar_url ? (
+                  <img src={githubUser.avatar_url} alt="Profile" className="w-6 h-6 rounded-full border border-slate-800" />
+                ) : (
+                  <User size={13} className="text-slate-500" />
+                )}
+                <div className="text-left min-w-0">
+                  <span className="text-[10px] font-bold text-slate-300 block truncate">@{githubUser?.login}</span>
+                  <span className="text-[8px] font-mono text-emerald-400 font-semibold block">INTEGRATED</span>
+                </div>
+              </div>
+              <button onClick={handleDisconnectGitHub} className="p-1 text-slate-500 hover:text-red-400 transition-colors" title="Logout session">
+                <LogOut size={11} />
+              </button>
+            </div>
+          ) : (
+            <div className="p-2.5 bg-slate-900/20 rounded-lg border border-slate-900/80 text-left space-y-1">
+              <span className="text-[9px] font-mono text-slate-500 block uppercase">Integration Node</span>
+              <span className="text-[10px] font-mono font-bold text-slate-400">Sandbox Unlinked</span>
+            </div>
+          )}
+
+          {/* Core Server Status */}
+          <div className="text-[9px] font-mono text-left space-y-1">
+            <div className="flex justify-between items-center text-slate-600">
+              <span>STATION STATE:</span>
+              {serverHealth === "online" ? (
+                <span className="text-emerald-400 font-bold flex items-center gap-1">
+                  <span className="w-1 h-1 rounded-full bg-emerald-400 animate-ping" /> ONLINE
+                </span>
+              ) : (
+                <span className="text-red-400 font-bold">OFFLINE</span>
+              )}
+            </div>
+
+            <div className="flex justify-between items-center text-slate-600">
+              <span>AI SEMANTIC:</span>
+              {apiKeyActive ? (
+                <span className="text-emerald-400 font-bold">ACTIVE</span>
+              ) : (
+                <span className="text-amber-400 font-bold">MUTED</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* 2. MAIN WORKSPACE FRAME */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        
+        {/* Top Professional Navigation Header */}
+        <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-6 py-4 flex items-center justify-between shrink-0 relative z-30">
+          
+          <div className="flex items-center gap-3">
+            {/* Mobile menu trigger */}
+            <button className="md:hidden p-1 text-slate-500 hover:text-slate-300" onClick={() => setIsSidebarOpen(true)}>
+              <Menu size={16} />
+            </button>
+
+            {/* Breadcrumb path */}
+            <div className="flex items-center gap-1 text-[10px] font-mono text-slate-500">
+              <span className="hover:text-slate-300 transition-colors cursor-pointer">CHRONOS_SaaS</span>
+              <ChevronRight size={10} />
+              <span className="text-indigo-400 font-extrabold uppercase">
+                {navigationItems.find(n => n.id === currentPage)?.label || currentPage}
               </span>
             </div>
-            <p className="text-[11px] text-slate-500">Chronological incident reconstruction & code archaeology</p>
-          </div>
-        </div>
-
-        {/* Server & API Connectivity Hub */}
-        <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono">
-          <div className="flex items-center gap-2 bg-slate-900 px-2.5 py-1.5 border border-slate-800 rounded-lg">
-            <span className="text-slate-500">STATION_STATE:</span>
-            {serverHealth === "checking" && (
-              <span className="text-amber-400 font-semibold flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> CHECKING
-              </span>
-            )}
-            {serverHealth === "online" && (
-              <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> ONLINE
-              </span>
-            )}
-            {serverHealth === "offline" && (
-              <span className="text-red-400 font-bold flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> OFFLINE
-              </span>
-            )}
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-900 px-2.5 py-1.5 border border-slate-800 rounded-lg">
-            <span className="text-slate-500">GEMINI_SECURE:</span>
-            {apiKeyActive ? (
-              <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                <CheckCircle2 size={11} /> SHIELDED
-              </span>
-            ) : (
-              <span className="text-amber-400 font-semibold flex items-center gap-1">
-                <AlertTriangle size={11} /> MOCK_FALLBACK
-              </span>
-            )}
-          </div>
-        </div>
-      </header>
+          {/* Global Incident Workspace Selector Dropdown */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 bg-slate-900/80 border border-slate-800 rounded-lg p-1 px-2">
+              <label className="text-[9px] font-mono text-slate-500 font-bold uppercase mr-1 hidden sm:inline-block">
+                Workspace Focus:
+              </label>
+              
+              <select
+                value={selectedScenarioId}
+                onChange={(e) => {
+                  setSelectedScenarioId(e.target.value);
+                  setWorkspaceMode("preset");
+                }}
+                className="bg-transparent text-[10px] font-mono text-indigo-400 font-bold focus:outline-none cursor-pointer border-none py-0.5"
+              >
+                {scenarios.map((sc) => (
+                  <option key={sc.id} value={sc.id} className="bg-slate-950 text-slate-300 text-xs font-sans">
+                    Incident: {sc.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-      {/* Main Workspace Frame */}
-      <div className="flex-1 flex flex-col p-6 max-w-7xl mx-auto w-full gap-5">
-        
+            {/* Return back to landing helper button */}
+            <button
+              onClick={() => setCurrentPage("landing")}
+              className="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer"
+            >
+              Close Console
+            </button>
+          </div>
+        </header>
+
         {/* Missing API Key Warning Banner */}
-        {showKeyWarning && (
-          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[11px] text-amber-400 leading-relaxed font-medium">
-            <div className="flex items-start gap-2.5">
+        {showKeyWarning && currentPage !== "settings" && (
+          <div className="mx-6 mt-4 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[11px] text-amber-400 leading-relaxed font-medium relative z-20">
+            <div className="flex items-start gap-2.5 text-left">
               <ShieldAlert size={15} className="shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold">Missing Workspace Secret API Keys</span>
                 <p className="text-slate-400 mt-0.5">
-                  To stream authentic live-reconstructed summaries through the Google AI Studio build proxy, set your <code className="text-amber-400 font-mono bg-amber-500/5 px-1 rounded">GEMINI_API_KEY</code> inside the <b>Settings &gt; Secrets</b> tab. The application will continue running safely on the internal pre-cached forensic database.
+                  Set your <code className="text-amber-400 font-mono bg-amber-500/5 px-1 rounded">GEMINI_API_KEY</code> inside the <b>Workspace Settings</b> panel to run live semantic searches.
                 </p>
               </div>
             </div>
             <button
-              onClick={() => setShowKeyWarning(false)}
-              className="px-2 py-1 border border-amber-500/30 hover:border-amber-500/60 rounded text-[10px] font-mono hover:text-white transition-colors self-end sm:self-center cursor-pointer"
+              onClick={() => setCurrentPage("settings")}
+              className="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/40 border border-amber-500/30 text-amber-400 hover:text-white rounded text-[10px] font-mono transition-colors self-end sm:self-center cursor-pointer"
             >
-              Dismiss
+              Open Settings
             </button>
           </div>
         )}
 
-        {/* 1. SCENARIO SELECTOR - Clean bento row */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl">
-          <span className="text-[10px] font-mono font-bold text-slate-500 block mb-3 uppercase tracking-wider">
-            Select Active Incident Forensic Workspace
-          </span>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {scenarios.map((sc) => {
-              const isActive = selectedScenarioId === sc.id;
-              return (
-                <div
-                  key={sc.id}
-                  onClick={() => setSelectedScenarioId(sc.id)}
-                  className={`p-3.5 rounded-lg border text-left cursor-pointer transition-all ${
-                    isActive
-                      ? "bg-indigo-600/10 border-indigo-500 text-indigo-100 shadow-[0_0_15px_rgba(99,102,241,0.1)]"
-                      : "bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-300"
-                  }`}
-                >
-                  <div className="flex justify-between items-start mb-1.5">
-                    <span className="text-xs font-sans font-bold block">{sc.name}</span>
-                    <span
-                      className={`text-[8px] font-mono font-bold px-1.5 py-0.5 rounded uppercase ${
-                        isActive ? "bg-indigo-500/20 text-indigo-400" : "bg-slate-900 text-slate-600"
-                      }`}
-                    >
-                      {isActive ? "ACTIVE STAGE" : "READY"}
-                    </span>
-                  </div>
-                  <p className="text-[10px] font-mono text-slate-500 leading-normal line-clamp-2">
-                    {sc.description}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 2. RECONSTRUCTION SEARCH BAR */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl space-y-3.5">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-              <Search size={12} />
-              Ask the Git Decision Database
-            </span>
-            <p className="text-[10px] text-slate-400">
-              Query why lines were deleted, who approved backdoors, or what triggered regressions inside the incident timeline.
-            </p>
-          </div>
-
-          <div className="relative flex items-center">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && runReconstruction(searchQuery)}
-              placeholder={`Ask: "${currentScenario.targetQuestion}"`}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-3 pr-24 py-2.5 text-xs font-mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 placeholder:text-slate-700"
-            />
-            <button
-              onClick={() => runReconstruction(searchQuery)}
-              disabled={!searchQuery.trim() || isReconstructing}
-              className="absolute right-2 px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[10px] font-bold font-mono transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
-            >
-              <Send size={10} />
-              <span>{isReconstructing ? "Parsing..." : "Reconstruct"}</span>
-            </button>
-          </div>
-
-          {/* Prompt Shortcuts */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-1">
-            <span className="text-[9px] font-mono text-slate-600 uppercase font-semibold mr-1">
-              PROMPT SUGGESTIONS:
-            </span>
-            {currentScenario.defaultQuestions.map((question) => (
-              <button
-                key={question}
-                onClick={() => {
-                  setSearchQuery(question);
-                  runReconstruction(question);
-                }}
-                className="text-[9px] font-mono bg-slate-950/60 hover:bg-slate-950 px-2.5 py-1 rounded border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
-              >
-                {question}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 3. PIPELINE WORKFLOW STATUS */}
-        <PipelineWorkflow stages={pipelineStages} activeStageId={activeStageId} />
-
-        {/* 4. AI REPORT PANEL - Dynamic Synthesis */}
-        {aiAnswer && (
-          <div className="bg-slate-900 border border-indigo-500/20 rounded-xl p-5 shadow-xl bg-gradient-to-br from-slate-900 to-indigo-950/20 animate-fade-in space-y-3.5">
-            <div className="flex justify-between items-center border-b border-indigo-500/10 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-indigo-500/10 rounded-md text-indigo-400">
-                  <Sparkles size={14} className="animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="text-xs font-sans font-bold text-slate-100">
-                    Forensic Timeline Reconstructed Report
-                  </h3>
-                  <p className="text-[10px] font-mono text-slate-500">
-                    Model: {apiKeyActive ? "gemini-3.5-flash" : "Local Database Grounding Matcher"}
-                  </p>
-                </div>
-              </div>
-              <span className="text-[9px] font-mono px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded border border-emerald-500/20">
-                FORENSIC PROOF SECURED
-              </span>
-            </div>
-
-            <div className="text-slate-300 leading-relaxed font-sans text-xs space-y-2 select-text whitespace-pre-wrap markdown-body bg-slate-950/40 p-4 rounded-lg border border-slate-800/60">
-              {aiAnswer.split("\n\n").map((para, pidx) => {
-                if (para.startsWith("###")) {
-                  return (
-                    <h4 key={pidx} className="text-xs font-bold text-slate-100 font-mono mt-3 mb-1 border-b border-slate-900 pb-1 uppercase tracking-wider text-indigo-400">
-                      {para.replace("###", "").trim()}
-                    </h4>
-                  );
-                }
-                return <p key={pidx} className="leading-relaxed font-mono text-[11px] text-slate-300">{para}</p>;
-              })}
-            </div>
-
-            {matchingEntities.length > 0 && (
-              <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 pt-1">
-                <span>GRAPH NODES CORRELATED:</span>
-                <div className="flex gap-1">
-                  {matchingEntities.map((ent) => (
-                    <span key={ent} className="bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20">
-                      {ent}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* 5. PRIMARY WORKSPACE MODULE SECTIONS - TAB SWITCHER */}
-        <div className="flex flex-col gap-4">
-          <div className="flex border-b border-slate-900 gap-1.5" id="workspace-navigator">
-            <button
-              onClick={() => setActiveTab("timeline")}
-              className={`px-4 py-2 border-b-2 text-xs font-bold font-mono tracking-tight transition-all cursor-pointer ${
-                activeTab === "timeline"
-                  ? "border-indigo-500 text-indigo-400 bg-indigo-600/5 font-extrabold"
-                  : "border-transparent text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <GitBranch size={13} />
-                <span>Forensic Incident Timeline</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("graph")}
-              className={`px-4 py-2 border-b-2 text-xs font-bold font-mono tracking-tight transition-all cursor-pointer ${
-                activeTab === "graph"
-                  ? "border-indigo-500 text-indigo-400 bg-indigo-600/5 font-extrabold"
-                  : "border-transparent text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Network size={13} />
-                <span>Semantic Relationship Graph</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("connectors")}
-              className={`px-4 py-2 border-b-2 text-xs font-bold font-mono tracking-tight transition-all cursor-pointer ${
-                activeTab === "connectors"
-                  ? "border-indigo-500 text-indigo-400 bg-indigo-600/5 font-extrabold"
-                  : "border-transparent text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Settings2 size={13} />
-                <span>Modular Integrations</span>
-              </div>
-            </button>
-          </div>
-
-          {/* Modular tab display render */}
-          <div className="transition-all duration-300">
-            {activeTab === "timeline" && (
-              <InteractiveTimeline
-                events={scenarioEvents}
-                selectedEventId={selectedEventId}
-                onSelectEvent={(id) => {
-                  setSelectedEventId(id);
-                  // Glow corresponding graph node too!
-                  const evt = scenarioEvents.find((e) => e.id === id);
-                  if (evt) {
-                    const nodeMatch = scenarioNodes.find(
-                      (n) => n.id.toLowerCase().includes(evt.author.toLowerCase()) || n.id.toLowerCase().includes(evt.refId.toLowerCase().replace("commit ", "co-").replace("issue #", "is-").replace("pr #", "pr-"))
-                    );
-                    if (nodeMatch) setSelectedNodeId(nodeMatch.id);
-                  }
-                }}
+        {/* 3. PRIMARY SAAS WORKSPACE CONTENT VIEWER */}
+        <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
+          <div className="max-w-6xl mx-auto w-full">
+            
+            {/* DASHBOARD PAGE */}
+            {currentPage === "dashboard" && (
+              <DashboardPage
+                scenarios={scenarios}
+                selectedScenarioId={selectedScenarioId}
+                onSelectScenario={setSelectedScenarioId}
+                onNavigateToTimeline={() => setCurrentPage("timeline")}
+                onNavigateToAskAi={() => setCurrentPage("ask_ai")}
+                isGitHubConnected={isGitHubConnected}
+                githubUser={githubUser}
+                customReposCount={customRepos.length}
               />
             )}
 
-            {activeTab === "graph" && (
-              <KnowledgeGraphView
+            {/* REPOSITORY CONNECTOR PAGE */}
+            {currentPage === "repository" && (
+              <div className="space-y-6">
+                <div className="text-left border-b border-slate-900 pb-4">
+                  <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wider block">
+                    Source Code Connectors
+                  </span>
+                  <h2 className="text-lg font-display font-bold text-slate-100 mt-0.5">
+                    Git Ingestion Pipelines
+                  </h2>
+                  <p className="text-[11px] text-slate-400">
+                    Solder live accounts. Authenticate with GitHub to ingest real-time code check-ins, PR comments, and issues.
+                  </p>
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+                  <ConnectorIntegrations
+                    connectors={connectors}
+                    onToggleConnector={() => {}}
+                    isGitHubConnected={isGitHubConnected}
+                    githubUser={githubUser}
+                    customRepos={customRepos}
+                    onAddRepo={handleAddRepo}
+                    onIngestRepo={fetchCustomTimeline}
+                    onDisconnectGitHub={handleDisconnectGitHub}
+                    onSelectRepo={(id) => {
+                      setSelectedCustomRepoId(id);
+                      setWorkspaceMode("live");
+                      setCurrentPage("timeline");
+                    }}
+                    selectedCustomRepoId={selectedCustomRepoId}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* TIMELINE PAGE */}
+            {currentPage === "timeline" && (
+              <div className="space-y-6">
+                <div className="text-left border-b border-slate-900 pb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wider block">
+                      Chronological Reconstruction
+                    </span>
+                    <h2 className="text-lg font-display font-bold text-slate-100 mt-0.5">
+                      Incident Forensic Timeline
+                    </h2>
+                    <p className="text-[11px] text-slate-400">
+                      Explore the exact sequence of events from commit triggers, build failures, approvals, and dynamic Lambda calls.
+                    </p>
+                  </div>
+                  
+                  {/* Mode Indicators */}
+                  <div className="flex bg-slate-900 p-1 rounded-lg border border-slate-800 text-[9px] font-mono font-bold">
+                    <button
+                      onClick={() => setWorkspaceMode("preset")}
+                      className={`px-3 py-1 rounded transition-colors cursor-pointer ${
+                        workspaceMode === "preset"
+                          ? "bg-indigo-600 text-white font-extrabold"
+                          : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      PRESET INCIDENTS
+                    </button>
+                    <button
+                      onClick={() => {
+                        setWorkspaceMode("live");
+                        if (customRepos.length > 0 && !selectedCustomRepoId) {
+                          setSelectedCustomRepoId(customRepos[0].id);
+                        }
+                      }}
+                      className={`px-3 py-1 rounded transition-colors cursor-pointer ${
+                        workspaceMode === "live"
+                          ? "bg-indigo-600 text-white font-extrabold"
+                          : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      LIVE REPOS
+                    </button>
+                  </div>
+                </div>
+
+                <InteractiveTimeline
+                  events={scenarioEvents}
+                  selectedEventId={selectedEventId}
+                  onSelectEvent={(id) => {
+                    setSelectedEventId(id);
+                    const evt = scenarioEvents.find((e) => e.id === id);
+                    if (evt) {
+                      const nodeMatch = scenarioNodes.find(
+                        (n) => n.id.toLowerCase().includes(evt.author.toLowerCase()) || n.id.toLowerCase().includes(evt.refId?.toLowerCase().replace("commit ", "co-").replace("issue #", "is-").replace("pr #", "pr-") || "")
+                      );
+                      if (nodeMatch) setSelectedNodeId(nodeMatch.id);
+                    }
+                  }}
+                />
+              </div>
+            )}
+
+            {/* EVIDENCE PAGE (incorporating KnowledgeGraph and Secure Proof Locker ledger) */}
+            {currentPage === "evidence" && (
+              <EvidencePage
                 nodes={scenarioNodes}
                 edges={scenarioEdges}
                 selectedNodeId={selectedNodeId}
                 onSelectNode={(id) => {
                   setSelectedNodeId(id);
-                  // Highlight corresponding timeline event too if available!
                   const matchedEvt = scenarioEvents.find(
-                    (e) => e.author.toLowerCase() === id.toLowerCase() || e.refId.toLowerCase().replace("commit ", "co-").replace("issue #", "is-").replace("pr #", "pr-").includes(id.toLowerCase())
+                    (e) => e.author.toLowerCase() === id.toLowerCase() || (e.refId || "").toLowerCase().replace("commit ", "co-").replace("issue #", "is-").replace("pr #", "pr-").includes(id.toLowerCase())
                   );
                   if (matchedEvt) setSelectedEventId(matchedEvt.id);
                 }}
               />
             )}
 
-            {activeTab === "connectors" && (
-              <ConnectorIntegrations
-                connectors={connectors}
-                onToggleConnector={handleToggleConnector}
+            {/* ASK FORENSIC AI PAGE (ChatGPT style chat, grounding documents and pipeline tracking) */}
+            {currentPage === "ask_ai" && (
+              <div className="space-y-6 text-left">
+                <div className="border-b border-slate-900 pb-4">
+                  <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wider block">
+                    Forensic Grounded Knowledge Copilot
+                  </span>
+                  <h2 className="text-lg font-display font-bold text-slate-100 mt-0.5">
+                    Ask the Decision Database Engine
+                  </h2>
+                  <p className="text-[11px] text-slate-400">
+                    Formulate queries about backend modifications, pipeline breaks, or backdoors. Grounded completely via ChromaDB semantic vector retrieval.
+                  </p>
+                </div>
+
+                {/* Query Input Section */}
+                <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">
+                      Forensic Query Console
+                    </span>
+                    <p className="text-[10px] text-slate-400">
+                      Query why files were changed, what caused build memory errors, or which branches bypass static checks.
+                    </p>
+                  </div>
+
+                  <div className="relative flex items-center">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && runReconstruction(searchQuery)}
+                      placeholder={isLiveMode ? "Ask: \"Why was this code changed?\" or \"Who reported this bug?\"" : `Ask: "${currentScenario.targetQuestion}"`}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-3 pr-24 py-2.5 text-xs font-mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 placeholder:text-slate-700"
+                    />
+                    <button
+                      onClick={() => runReconstruction(searchQuery)}
+                      disabled={!searchQuery.trim() || isReconstructing}
+                      className="absolute right-2 px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[10px] font-bold font-mono transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                    >
+                      <Send size={10} />
+                      <span>{isReconstructing ? "Executing..." : "Query AI"}</span>
+                    </button>
+                  </div>
+
+                  {/* Suggestions pills */}
+                  {!isLiveMode && (
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <span className="text-[9px] font-mono text-slate-600 uppercase font-bold mr-1">
+                        SUGGESTED PILOTS:
+                      </span>
+                      {currentScenario.defaultQuestions.map((q) => (
+                        <button
+                          key={q}
+                          onClick={() => {
+                            setSearchQuery(q);
+                            runReconstruction(q);
+                          }}
+                          className="text-[9px] font-mono bg-slate-950 hover:bg-slate-950/80 px-2.5 py-1 rounded border border-slate-850 hover:border-slate-800 text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Pipeline Workflow block */}
+                <PipelineWorkflow stages={pipelineStages} activeStageId={activeStageId} />
+
+                {/* AI report panel */}
+                {aiAnswer && (
+                  <div className="bg-slate-900 border border-indigo-500/20 rounded-xl p-5 shadow-xl bg-gradient-to-br from-slate-900 to-indigo-950/20 space-y-4">
+                    <div className="flex justify-between items-center border-b border-indigo-500/10 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-indigo-500/10 rounded-md text-indigo-400">
+                          <Sparkles size={14} className="animate-pulse" />
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-sans font-bold text-slate-100">
+                            Forensic Investigation Response
+                          </h3>
+                          <p className="text-[10px] font-mono text-slate-500">
+                            System Model: {apiKeyActive ? "gemini-3.5-flash (Grounded)" : "Immutable Local DB Parser"}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-mono px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">
+                        GROUNDED PROOF SECURED
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-950/40 p-5 rounded-lg border border-slate-800/60 leading-relaxed select-text font-sans">
+                      <MarkdownRenderer text={aiAnswer} />
+                    </div>
+
+                    {matchingEntities.length > 0 && (
+                      <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 pt-1">
+                        <span>GRAPH CORRELATIONS:</span>
+                        <div className="flex gap-1 flex-wrap">
+                          {matchingEntities.map((ent) => (
+                            <span key={ent} className="bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 text-[9px]">
+                              {ent}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Retrieved document chunks (from hybrid search) */}
+                    {retrievedDocs && retrievedDocs.length > 0 && (
+                      <div className="border-t border-slate-800/80 pt-4 mt-4 space-y-3">
+                        <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">
+                          Retrieved Ground Truth Documents (ChromaDB Vector + BM25 Keyword Hybrid RAG)
+                        </span>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {retrievedDocs.map((doc, idx) => {
+                            const entityTypeColors: Record<string, string> = {
+                              issue: "border-amber-500/30 bg-amber-500/5 text-amber-400",
+                              pr: "border-purple-500/30 bg-purple-500/5 text-purple-400",
+                              commit: "border-emerald-500/30 bg-emerald-500/5 text-emerald-400",
+                              review: "border-blue-500/30 bg-blue-500/5 text-blue-400"
+                            };
+                            const typeColor = entityTypeColors[doc.entityType] || "border-slate-800 bg-slate-900/40 text-slate-400";
+                            
+                            return (
+                              <div key={doc.id || idx} className="p-3 bg-slate-950/60 border border-slate-800 rounded-lg text-left space-y-2 hover:border-indigo-500/30 transition-colors">
+                                <div className="flex justify-between items-start gap-2">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`text-[8px] font-bold font-mono px-1.5 py-0.5 rounded uppercase border ${typeColor}`}>
+                                      {doc.entityType}
+                                    </span>
+                                    <span className="text-[10px] font-bold font-sans text-slate-200 line-clamp-1">
+                                      {doc.metadata?.title || doc.metadata?.sha?.substring(0, 7) || "GitHub Node"}
+                                    </span>
+                                  </div>
+                                  <span className="text-[9px] font-mono text-indigo-400 font-bold whitespace-nowrap bg-indigo-500/5 border border-indigo-500/10 px-1 py-0.5 rounded">
+                                    Score: {doc.score?.toFixed(3)}
+                                  </span>
+                                </div>
+                                
+                                <p className="text-[10px] text-slate-400 font-mono line-clamp-2 leading-relaxed whitespace-pre-wrap bg-slate-950/40 p-2 border border-slate-900 rounded">
+                                  {doc.text}
+                                </p>
+                                
+                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[8px] font-mono text-slate-500 border-t border-slate-900 pt-1.5">
+                                  {doc.metadata?.author && <span>By: @{doc.metadata.author}</span>}
+                                  {doc.metadata?.createdAt && <span>• {new Date(doc.metadata.createdAt).toLocaleDateString()}</span>}
+                                  <span>• Ranks: Semantic #{doc.semanticRank}, BM25 #{doc.bm25Rank}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SETTINGS PAGE */}
+            {currentPage === "settings" && (
+              <SettingsPage
+                apiKeyActive={apiKeyActive}
+                onSaveApiKey={handleSaveApiKeyOnBackend}
+                isGitHubConnected={isGitHubConnected}
+                githubUser={githubUser}
+                onDisconnectGitHub={handleDisconnectGitHub}
               />
             )}
+
           </div>
-        </div>
+        </main>
+
+        {/* Minimal Footer */}
+        <footer className="border-t border-slate-900 bg-slate-950 py-4 px-6 shrink-0">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-[10px] font-mono text-slate-500">
+            <div className="flex items-center gap-1.5">
+              <BookOpen size={11} className="text-slate-600" />
+              <span>SECURITY FORENSICS POLICY: COMPLIANT WITH LOCK-ID-77291</span>
+            </div>
+            <span>&copy; 2026 Chronos Forensics Inc. • GitHub + Vercel + Linear Inspired</span>
+          </div>
+        </footer>
 
       </div>
-
-      {/* Cybernetic Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-5 px-6 mt-auto">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-mono text-slate-500">
-          <div className="flex items-center gap-1.5">
-            <BookOpen size={11} className="text-slate-600" />
-            <span>INCIDENT FORENSICS STANDARDS & POLICY compliance block: LOCK-ID-77291</span>
-          </div>
-          <span>&copy; 2026 Knowledge Time Machine Inc. • Designed for modern engineering logs</span>
-        </div>
-      </footer>
 
     </div>
   );

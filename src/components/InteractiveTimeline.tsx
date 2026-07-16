@@ -1,5 +1,21 @@
 import React, { useState } from "react";
-import { GitCommit, GitPullRequest, AlertCircle, MessageSquare, Terminal, ChevronRight, ChevronDown, Clock, User } from "lucide-react";
+import {
+  GitCommit,
+  GitPullRequest,
+  AlertCircle,
+  MessageSquare,
+  Terminal,
+  ChevronRight,
+  ChevronDown,
+  Clock,
+  User,
+  GitMerge,
+  Tag,
+  CheckCircle2,
+  XCircle,
+  FileEdit,
+  PlusCircle
+} from "lucide-react";
 import { WorkflowEvent } from "../types";
 
 interface InteractiveTimelineProps {
@@ -21,8 +37,26 @@ export default function InteractiveTimeline({
 
   const getEventIcon = (type: string, severity: string) => {
     switch (type) {
+      case "issue_created":
+        return <PlusCircle size={14} className="text-amber-500" />;
+      case "issue_updated":
+        return <FileEdit size={14} className="text-amber-400" />;
+      case "pr_opened":
+        return <GitPullRequest size={14} className="text-indigo-400" />;
       case "commit":
         return <GitCommit size={14} className="text-purple-400" />;
+      case "review_requested_changes":
+        return <XCircle size={14} className="text-rose-500 animate-pulse" />;
+      case "review_approved":
+        return <CheckCircle2 size={14} className="text-emerald-500" />;
+      case "ci_failed":
+        return <AlertCircle size={14} className="text-red-500 animate-pulse" />;
+      case "ci_passed":
+        return <CheckCircle2 size={14} className="text-teal-400" />;
+      case "merge":
+        return <GitMerge size={14} className="text-violet-500" />;
+      case "release":
+        return <Tag size={14} className="text-blue-400 animate-pulse" />;
       case "pr":
         return <GitPullRequest size={14} className="text-indigo-400" />;
       case "issue":
