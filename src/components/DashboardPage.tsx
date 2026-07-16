@@ -65,13 +65,13 @@ export default function DashboardPage({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wider block">
-              Operator Console Active
+              Active Console
             </span>
             <h2 className="text-xl font-display font-bold text-slate-100">
-              Welcome back, {githubUser?.name || githubUser?.login || "Forensic Investigator"}
+              Welcome back, {githubUser?.name || githubUser?.login || "Engineer"}
             </h2>
             <p className="text-[11px] text-slate-400 max-w-xl">
-              Knowledge Time Machine has mapped your repository integrations. All systems are operational with 99.98% semantic grounding index accuracy.
+              Knowledge Time Machine has mapped your repository integrations. All systems are operational.
             </p>
           </div>
           
@@ -81,14 +81,14 @@ export default function DashboardPage({
               className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[10px] font-bold font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(99,102,241,0.2)]"
             >
               <Sparkles size={11} className="animate-pulse" />
-              Ask Forensic AI
+              Ask AI
             </button>
             <button
               onClick={onNavigateToTimeline}
               className="px-3.5 py-2 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-lg text-[10px] font-bold font-mono transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Clock size={11} />
-              Timeline Audit
+              Timeline
             </button>
           </div>
         </div>
@@ -140,15 +140,15 @@ export default function DashboardPage({
 
         <div className="bg-slate-900 border border-slate-800/80 p-4 rounded-xl text-left space-y-2">
           <div className="flex justify-between items-center text-slate-500">
-            <span className="text-[10px] font-mono uppercase font-bold tracking-wider">Locked Evidences</span>
+            <span className="text-[10px] font-mono uppercase font-bold tracking-wider">Saved Explanations</span>
             <FileLock2 size={14} className="text-emerald-400" />
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-slate-100">12</span>
-            <span className="text-[9px] font-mono text-emerald-400 font-semibold">Immutable hashes</span>
+            <span className="text-[9px] font-mono text-emerald-400 font-semibold">Saved changes</span>
           </div>
           <p className="text-[9px] font-mono text-slate-500 leading-normal">
-            Tamper-proof forensic proofs archived.
+            Saved reasons behind changes.
           </p>
         </div>
       </div>
@@ -245,14 +245,14 @@ export default function DashboardPage({
           </div>
         </div>
 
-        {/* Workspace Active Incidents and Alerts Log - lg:col-span-5 */}
+        {/* Scenario Selection Log - lg:col-span-5 */}
         <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-xl p-5 text-left flex flex-col space-y-4 shadow-lg">
           <div className="border-b border-slate-800/80 pb-3">
             <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-wider block">
-              Forensic Locker Records
+              Demo Scenarios
             </span>
             <h3 className="text-xs font-sans font-bold text-slate-200 mt-0.5">
-              Active Incident Scenarios ({scenarios.length})
+              Explore Scenarios ({scenarios.length})
             </h3>
           </div>
 
@@ -313,7 +313,7 @@ export default function DashboardPage({
                       }}
                       className="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-0.5"
                     >
-                      Audit timeline
+                      View timeline
                       <ArrowUpRight size={10} />
                     </button>
                   </div>

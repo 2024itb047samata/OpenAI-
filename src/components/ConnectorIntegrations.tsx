@@ -98,7 +98,7 @@ export default function ConnectorIntegrations({
 
   const handleTriggerIngestion = async (repoId: string) => {
     setIngestionStatuses((prev) => ({ ...prev, [repoId]: "running" }));
-    setIngestionLogs((prev) => ({ ...prev, [repoId]: "Initializing GitHub Forensics pipeline...\n" }));
+    setIngestionLogs((prev) => ({ ...prev, [repoId]: "Initializing GitHub Ingestion pipeline...\n" }));
 
     try {
       const updateLogs = (msg: string) => {
@@ -148,15 +148,15 @@ export default function ConnectorIntegrations({
       <div className="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-lg flex flex-col gap-3">
         <div>
           <span className="text-[10px] font-mono font-bold text-slate-500 block uppercase tracking-wider">
-            Modular Ingest Adaptors
+            Modular Connectors
           </span>
           <p className="text-[10px] text-slate-400 mt-0.5">
-            Solder external repositories or platforms into your central Semantic Knowledge Graph.
+            Connect external repositories or platforms into your central Semantic Knowledge Base.
           </p>
         </div>
 
         <nav className="space-y-1.5 pt-2 border-t border-slate-800">
-          {/* GitHub Adapter */}
+          {/* GitHub Connector */}
           <button
             onClick={() => setActiveTab("github")}
             className={`w-full flex items-center justify-between p-3 rounded-lg border text-left transition-all ${
@@ -174,8 +174,8 @@ export default function ConnectorIntegrations({
                 <Code size={13} />
               </div>
               <div>
-                <span className="text-xs font-sans font-bold block text-slate-200">GitHub Adapter</span>
-                <span className="text-[9px] font-mono text-slate-500 uppercase">REAL INTEGRATION</span>
+                <span className="text-xs font-sans font-bold block text-slate-200">GitHub Connector</span>
+                <span className="text-[9px] font-mono text-slate-500 uppercase">LIVE SYNC</span>
               </div>
             </div>
 
@@ -190,7 +190,7 @@ export default function ConnectorIntegrations({
             </div>
           </button>
 
-          {/* Jira, Slack, Notion Adapters (Showing modularity) */}
+          {/* Jira, Slack, Notion Connectors (Showing modularity) */}
           {connectors
             .filter((c) => c.id !== "github")
             .map((conn) => {
@@ -211,7 +211,7 @@ export default function ConnectorIntegrations({
                     </div>
                     <div>
                       <span className="text-xs font-sans font-bold block text-slate-300">{conn.name}</span>
-                      <span className="text-[9px] font-mono text-slate-600 uppercase">{conn.type} ADAPTER</span>
+                      <span className="text-[9px] font-mono text-slate-600 uppercase">{conn.type} CONNECTOR</span>
                     </div>
                   </div>
                   <span className="text-[9px] font-mono text-slate-700">MODULAR</span>
@@ -227,7 +227,7 @@ export default function ConnectorIntegrations({
             <span className="font-bold">MODULAR EXTENSION SDK</span>
           </div>
           <p className="text-[9px] leading-relaxed text-slate-500">
-            The Time Machine core accepts structured logs from any developer tool. New integrations (Jira, Slack, Notion) extend the <code className="text-indigo-300 bg-slate-900 px-1 py-0.5 rounded">BaseConnector</code> schema to map timelines without modifying the core forensics algorithm.
+            The Time Machine core accepts structured logs from any developer tool. New integrations (Jira, Slack, Notion) extend the <code className="text-indigo-300 bg-slate-900 px-1 py-0.5 rounded">BaseConnector</code> schema to map timelines without modifying the core AI search algorithm.
           </p>
         </div>
       </div>
@@ -240,10 +240,10 @@ export default function ConnectorIntegrations({
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-3">
               <div>
                 <span className="text-[9px] font-mono text-indigo-400 uppercase tracking-wider block">
-                  GitHub Forensic Gateway
+                  GitHub Connector
                 </span>
                 <h3 className="text-xs font-sans font-bold text-slate-200 mt-0.5">
-                  Real-time Ingestion Engine & Credentials
+                  Sync Repositories & Manage Connection
                 </h3>
               </div>
 
@@ -296,10 +296,10 @@ export default function ConnectorIntegrations({
               <div className="md:col-span-5 space-y-4">
                 <div className="space-y-1">
                   <h4 className="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-tight">
-                    Add Forensic Target
+                    Add Repository
                   </h4>
                   <p className="text-[9px] text-slate-500">
-                    Register any public or authenticated GitHub repository to parse its issues, PRs, and commit history.
+                    Connect any public or authenticated GitHub repository to parse its issues, PRs, and commit history.
                   </p>
                 </div>
 
@@ -347,7 +347,7 @@ export default function ConnectorIntegrations({
                     ) : (
                       <>
                         <Plus size={11} />
-                        <span>Register Repository</span>
+                        <span>Add Repository</span>
                       </>
                     )}
                   </button>
@@ -358,10 +358,10 @@ export default function ConnectorIntegrations({
               <div className="md:col-span-7 flex flex-col space-y-3">
                 <div className="space-y-1">
                   <h4 className="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-tight">
-                    Registered Forensics Registry
+                    Connected Repositories
                   </h4>
                   <p className="text-[9px] text-slate-500">
-                    Select a repository to toggle it as the active workspace, or click "Run Pipeline" to index it.
+                    Select a repository to toggle it as active, or click "Sync Repository" to index it.
                   </p>
                 </div>
 
@@ -392,7 +392,7 @@ export default function ConnectorIntegrations({
                                 </span>
                                 {isActive && (
                                   <span className="text-[8px] font-mono bg-indigo-500/20 text-indigo-400 px-1 py-0.2 rounded uppercase font-bold">
-                                    ACTIVE CASE
+                                    ACTIVE REPO
                                   </span>
                                 )}
                               </div>
@@ -435,7 +435,7 @@ export default function ConnectorIntegrations({
                                 disabled={status === "running"}
                                 className="px-2 py-0.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded transition-colors cursor-pointer"
                               >
-                                {rp.lastSyncedAt ? "Re-index" : "Run Ingestion Pipeline"}
+                                {rp.lastSyncedAt ? "Re-index" : "Sync Repository"}
                               </button>
                             </div>
                           </div>
@@ -471,7 +471,7 @@ export default function ConnectorIntegrations({
             <div className="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-lg text-slate-400 text-xs flex items-center gap-2.5 font-medium leading-relaxed">
               <AlertCircle size={14} className="shrink-0 text-indigo-400" />
               <span>
-                The adapter <strong>{activeConn.name}</strong> is pre-registered in the modular system. Configure details below to activate live pipelines.
+                The connector <strong>{activeConn.name}</strong> is pre-registered in the modular system. Configure details below to activate live pipelines.
               </span>
             </div>
 
@@ -506,7 +506,7 @@ export default function ConnectorIntegrations({
                 className="px-3 py-1.5 rounded text-xs font-bold font-mono tracking-tight bg-slate-950 border border-slate-800 text-slate-600 cursor-not-allowed flex items-center gap-1.5"
               >
                 <Check size={12} />
-                <span>Enable Adapter</span>
+                <span>Enable Connector</span>
               </button>
             </div>
           </div>

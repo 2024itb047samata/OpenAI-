@@ -57,7 +57,7 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
         <div className="space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-[10px] font-mono font-bold animate-fade-in">
             <Sparkles size={11} className="animate-pulse" />
-            <span>AI-POWERED GIT ARCHAEOLOGY & FORENSICS</span>
+            <span>AI-POWERED GIT HISTORY SEARCH</span>
           </div>
           
           <h1 className="text-4xl md:text-6xl font-display font-extrabold tracking-tight text-slate-100 max-w-3xl leading-[1.1] bg-gradient-to-r from-slate-100 via-slate-100 to-indigo-400 text-transparent bg-clip-text">
@@ -65,7 +65,7 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
           </h1>
           
           <p className="text-sm md:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed font-sans">
-            Chronological incident reconstruction and code archaeology. Knowledge Time Machine parses your issues, pull requests, and commits into a semantic relationship graph using vector embeddings.
+            Explore why changes happened. Knowledge Time Machine parses your issues, pull requests, and commits into an easy-to-use relationship graph using AI embeddings.
           </p>
         </div>
 
@@ -75,7 +75,7 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
             onClick={onLaunch}
             className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold font-sans tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:scale-[1.02]"
           >
-            Open Forensic Console
+            Launch Time Machine
             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </button>
           <a
@@ -96,32 +96,32 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
                 <span className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
                 <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
                 <span className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
-                <span className="text-[9px] font-mono text-slate-600 ml-2">CHRONOS_CONSOLE_ACTIVE</span>
+                <span className="text-[9px] font-mono text-slate-600 ml-2">TIME_MACHINE_ACTIVE</span>
               </div>
               <div className="text-[9px] font-mono text-indigo-400 bg-indigo-500/5 border border-indigo-500/10 px-2 py-0.5 rounded">
-                SECURED COMPLIANCE LOCK
+                TIME MACHINE ONLINE
               </div>
             </div>
 
             {/* Simulated graph or stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="bg-slate-900/40 border border-slate-800/60 rounded-lg p-3 space-y-1.5">
-                <span className="text-[9px] font-mono text-slate-500 block">SEMANTIC RECONSTRUCTION</span>
+                <span className="text-[9px] font-mono text-slate-500 block">AI SEARCH ACCURACY</span>
                 <div className="text-base font-bold text-slate-200">99.98% SLA</div>
                 <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-900">
                   <div className="bg-indigo-500 h-full w-[99.98%]" />
                 </div>
               </div>
               <div className="bg-slate-900/40 border border-slate-800/60 rounded-lg p-3 space-y-1.5">
-                <span className="text-[9px] font-mono text-slate-500 block">KNOWLEDGE NODES INDEXED</span>
-                <div className="text-base font-bold text-slate-200">418 Artefacts</div>
+                <span className="text-[9px] font-mono text-slate-500 block">ITEMS INDEXED</span>
+                <div className="text-base font-bold text-slate-200">418 Items</div>
                 <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-900">
                   <div className="bg-violet-500 h-full w-[85%]" />
                 </div>
               </div>
               <div className="bg-slate-900/40 border border-slate-800/60 rounded-lg p-3 space-y-1.5">
-                <span className="text-[9px] font-mono text-slate-500 block">SECURE PROOF EVIDENCE</span>
-                <div className="text-base font-bold text-slate-200">12 locked files</div>
+                <span className="text-[9px] font-mono text-slate-500 block">SAVED REASONS</span>
+                <div className="text-base font-bold text-slate-200">12 saved files</div>
                 <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-900">
                   <div className="bg-emerald-500 h-full w-[100%]" />
                 </div>
@@ -129,9 +129,9 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
             </div>
 
             <div className="bg-slate-900/20 border border-slate-900 rounded p-3 text-[10px] font-mono text-slate-500 leading-relaxed">
-              <span className="text-indigo-400 font-bold">forensic-ai:~$</span> query --why-code-changed --commit="7b8e1a2"<br />
-              <span className="text-slate-300">Searching ChromaDB collection... Merging BM25 reciprocal rank fusion... Found match!</span><br />
-              <span className="text-indigo-300 font-semibold">"Redis removed under PR #405 to reduce staging environment sandbox costs ($120/month). Unintended side effect: OOM crash due to unevictable global JavaScript cache object."</span>
+              <span className="text-indigo-400 font-bold">time-machine:~$</span> query --why-code-changed --commit="7b8e1a2"<br />
+              <span className="text-slate-300">Searching collection... Merging reciprocal rank fusion... Found match!</span><br />
+              <span className="text-indigo-300 font-semibold">"Redis removed under PR #405 to reduce staging environment sandboxes costs ($120/month). Unintended side effect: memory crash due to in-process JavaScript cache object."</span>
             </div>
           </div>
         </div>
@@ -144,10 +144,10 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
             Core Architecture
           </span>
           <h2 className="text-2xl md:text-3xl font-display font-bold text-white tracking-tight">
-            Designed for Modern Dev Teams & Security Auditors
+            Designed for Modern Dev Teams & Engineers
           </h2>
           <p className="text-xs text-slate-400 max-w-xl mx-auto">
-            A premium incident investigation platform styled after GitHub, Linear, and Vercel.
+            A clean, fast platform styled after GitHub, Linear, and Vercel.
           </p>
         </div>
 
@@ -186,7 +186,7 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
 
       {/* Simple Footer */}
       <footer className="border-t border-slate-900 bg-slate-950 py-8 px-6 mt-auto text-center text-[10px] font-mono text-slate-500 relative z-10">
-        <p>&copy; 2026 Knowledge Time Machine Inc. All rights reserved. • ISO-27001 Certified Forensic Architecture</p>
+        <p>&copy; 2026 Knowledge Time Machine Inc. All rights reserved. • approachable and simple for all developers</p>
       </footer>
     </div>
   );

@@ -24,13 +24,13 @@ export default function SettingsPage({
   const [evictionPolicy, setEvictionPolicy] = useState("LRU");
 
   const [team, setTeam] = useState([
-    { name: "Alice Dev", role: "Security & Forensic Investigator", email: "alice@company.com" },
+    { name: "Alice Dev", role: "Developer & Engineer", email: "alice@company.com" },
     { name: "Charlie Arch", role: "Infrastructure Architect", email: "charlie@company.com" },
-    { name: "Dave Manager", role: "Compliance Lead Manager", email: "dave@company.com" }
+    { name: "Dave Manager", role: "Product Manager", email: "dave@company.com" }
   ]);
 
   const [newName, setNewName] = useState("");
-  const [newRole, setNewRole] = useState("Investigator");
+  const [newRole, setNewRole] = useState("Engineer");
   const [newEmail, setNewEmail] = useState("");
 
   const handleAddMember = (e: React.FormEvent) => {
@@ -55,13 +55,13 @@ export default function SettingsPage({
       {/* Page Header */}
       <div className="border-b border-slate-900 pb-4">
         <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wider block">
-          Platform Workspace Configurations
+          Platform Configurations
         </span>
         <h2 className="text-lg font-display font-bold text-slate-100 mt-0.5">
-          Workspace & API Tuner Settings
+          App & API Tuner Settings
         </h2>
         <p className="text-[11px] text-slate-400">
-          Configure API credentials, fine-tune hybrid semantic search grounding thresholds, and manage your audit investigator team.
+          Configure API credentials, fine-tune AI settings, and manage your team.
         </p>
       </div>
 
@@ -70,7 +70,7 @@ export default function SettingsPage({
         {/* Left column - Credentials and RAG parameters */}
         <div className="lg:col-span-7 space-y-5">
           
-          {/* Section 1: Security & Credentials */}
+          {/* Section 1: Credentials */}
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
             <div className="flex items-center gap-2 border-b border-slate-850 pb-3">
               <KeyRound size={15} className="text-indigo-400" />
@@ -101,7 +101,7 @@ export default function SettingsPage({
                   </button>
                 </div>
                 <p className="text-[9px] text-slate-500 leading-normal">
-                  Secrets are persisted on your secure back-end sandbox container and never exposed to browser inspectors.
+                  Secrets are saved on your secure back-end container and never exposed to the browser.
                 </p>
               </div>
             </form>
@@ -109,14 +109,14 @@ export default function SettingsPage({
             {savedSuccess && (
               <div className="p-2 bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-mono rounded flex items-center gap-1.5 animate-fade-in">
                 <CheckCircle2 size={13} />
-                <span>Gemini API Key locked and registered into workspace successfully.</span>
+                <span>Gemini API Key saved successfully.</span>
               </div>
             )}
 
             {/* GitHub Connection */}
             <div className="border-t border-slate-850/60 pt-4 mt-2 space-y-3">
               <span className="text-[10px] font-mono font-bold text-slate-400 uppercase block">
-                GitHub Auth Node Integration
+                GitHub Connection
               </span>
 
               {isGitHubConnected ? (
@@ -134,7 +134,7 @@ export default function SettingsPage({
                         @{githubUser?.login || "Active Session"}
                       </span>
                       <span className="text-[9px] font-mono text-slate-500">
-                        Token synced to pull live chronological repository data
+                        Token synced to load live repository data
                       </span>
                     </div>
                   </div>
@@ -164,19 +164,19 @@ export default function SettingsPage({
             </div>
           </div>
 
-          {/* Section 2: Fine Tuning Parameters (sliders, dropdowns) */}
+          {/* Section 2: AI Settings */}
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
             <div className="flex items-center gap-2 border-b border-slate-850 pb-3">
               <Sliders size={15} className="text-indigo-400" />
               <h3 className="text-xs font-sans font-bold text-slate-200">
-                Grounding & AI RAG Fine-Tuning
+                AI Search Settings
               </h3>
             </div>
 
             <div className="space-y-4 text-xs">
               <div className="space-y-1.5">
                 <div className="flex justify-between font-mono font-bold text-[10px] text-slate-400">
-                  <span>GROUNDING CONFIDENCE BOUNDS</span>
+                  <span>SEARCH THRESHOLD</span>
                   <span className="text-indigo-400">{confidence}%</span>
                 </div>
                 <input
@@ -188,13 +188,13 @@ export default function SettingsPage({
                   className="w-full accent-indigo-500"
                 />
                 <p className="text-[9px] text-slate-500 font-mono">
-                  Reject retrieved documents with scoring weights below this percentage rate.
+                  Ignore search results with score weights below this rate.
                 </p>
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex justify-between font-mono font-bold text-[10px] text-slate-400">
-                  <span>RECIPROCAL RANK FUSION (RRF) CONSTANT</span>
+                  <span>SEARCH RANK FUSION CONSTANT</span>
                   <span className="text-indigo-400">k = {rrfConstant}</span>
                 </div>
                 <input
@@ -206,14 +206,14 @@ export default function SettingsPage({
                   className="w-full accent-indigo-500"
                 />
                 <p className="text-[9px] text-slate-500 font-mono">
-                  Controls the scaling curve of keyword (BM25) and semantic vector merges.
+                  Controls the merge behavior of keyword and semantic search.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div className="space-y-1.5 text-left">
                   <label className="text-[10px] font-mono font-bold text-slate-400 block">
-                    EMBEDDING VECTOR MODEL
+                    AI MODEL
                   </label>
                   <select
                     value={vectorModel}
@@ -227,7 +227,7 @@ export default function SettingsPage({
 
                 <div className="space-y-1.5 text-left">
                   <label className="text-[10px] font-mono font-bold text-slate-400 block">
-                    CACHE EVICTION POLICY
+                    CACHE POLICY
                   </label>
                   <select
                     value={evictionPolicy}
@@ -252,7 +252,7 @@ export default function SettingsPage({
             <div className="flex items-center gap-2 border-b border-slate-850 pb-3">
               <Users size={15} className="text-indigo-400" />
               <h3 className="text-xs font-sans font-bold text-slate-200">
-                Workspace Audit Team ({team.length})
+                Team Members ({team.length})
               </h3>
             </div>
 
@@ -275,7 +275,7 @@ export default function SettingsPage({
             {/* Invite form */}
             <form onSubmit={handleAddMember} className="border-t border-slate-850/60 pt-4 mt-2 space-y-3">
               <span className="text-[10px] font-mono font-bold text-slate-400 uppercase block">
-                Add Investigator / Team Node
+                Invite Team Member
               </span>
 
               <div className="space-y-2 text-xs">
@@ -301,9 +301,9 @@ export default function SettingsPage({
                     onChange={(e) => setNewRole(e.target.value)}
                     className="flex-1 bg-slate-950 border border-slate-850 text-[11px] font-mono text-slate-300 rounded-lg px-2 py-1.5 focus:outline-none"
                   >
-                    <option value="Investigator">Investigator</option>
-                    <option value="Infrastructure Auditor">Infrastructure Auditor</option>
-                    <option value="Compliance Manager">Compliance Manager</option>
+                    <option value="Engineer">Engineer</option>
+                    <option value="Architect">Architect</option>
+                    <option value="Manager">Manager</option>
                   </select>
 
                   <button

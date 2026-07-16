@@ -602,7 +602,7 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: `USER QUERY: ${queryText}\nSCENARIO NAME: ${currentScenario.name}`,
-          systemInstruction: `You are the Knowledge Time Machine forensic AI analyzer. Explain the chronologies and underlying "Why" backdoors or regressions occurred based on WORKFLOW_EVENTS. Current: ${JSON.stringify(scenarioEvents, null, 2)}`,
+          systemInstruction: `You are the Knowledge Time Machine AI assistant. Explain the timelines and underlying reasons why changes or regressions occurred based on WORKFLOW_EVENTS. Current: ${JSON.stringify(scenarioEvents, null, 2)}`,
           model: "gemini-3.5-flash",
           temperature: 0.1
         })
@@ -615,7 +615,7 @@ export default function App() {
         throw new Error("Gemini endpoint bypassed or returned non-ok status");
       }
     } catch (err) {
-      console.warn("Falling back to local forensic model:", err);
+      console.warn("Falling back to local model:", err);
       generateLocalFallbackAnswer(queryText);
     } finally {
       setIsReconstructing(false);
@@ -626,7 +626,7 @@ export default function App() {
     const qLower = query.toLowerCase();
     if (selectedScenarioId === "redis-incident") {
       if (qLower.includes("redis") || qLower.includes("remove") || qLower.includes("why")) {
-        setAiAnswer(`### 🔍 Redis Removal Incident Report
+        setAiAnswer(`### 🔍 Redis Removal Report
 
 **1. Root Cause Analysis**
 Redis was removed in commit **7b8e1a2** by **bob_ops** under **PR #405** to reduce staging infrastructure budget fees (saving $120/month per staging environment sandbox) following the resource constraints raised in **Issue #101**.
@@ -640,12 +640,12 @@ Bob replaced the robust Redis remote cache server with an unbound global JavaScr
 
 **Suggested Mitigation**: Never use unevictable global objects for active request sessions. Ensure all staging fallbacks utilize containerized Redis replicas or strictly bounded caches.`);
       } else {
-        setAiAnswer(`### 🔍 General Forensic Summary: Redis Incident
+        setAiAnswer(`### 🔍 General Summary: Redis Incident
 The timeline reveals that staging downscaling optimization led to removing the containerized Redis cluster. The resulting fallback memory cache memory leak was flagged by **alice_dev** on code review but dismissed, resulting in an OOM container failure under test load. Resolved via a bounded LRU policy by **charlie_arch** in **fa9c12a**.`);
       }
     } else if (selectedScenarioId === "auth-bypass") {
       if (qLower.includes("bug") || qLower.includes("who") || qLower.includes("bypass")) {
-        setAiAnswer(`### 🔒 Cryptographic Auth Bypass Incident Report
+        setAiAnswer(`### 🔒 Cryptographic Auth Bypass Report
 
 **1. Who Introduced the Vulnerability?**
 The bypass backdoor was committed by **bob_ops** in **Commit db01a2f**. 
@@ -658,11 +658,11 @@ The bypass was created to resolve **Issue #202** (Vite development sandboxes exp
 **3. Remediation**
 On July 4th, **alice_dev** discovered the active backdoor in production packages and reverted the backdoor check in **Commit 9c2041e**, restoring secure HMAC signature validation.`);
       } else {
-        setAiAnswer(`### 🔍 General Forensic Summary: Auth Bypass
+        setAiAnswer(`### 🔍 General Summary: Auth Bypass
 A development backdoor committed by **bob_ops** was administrative-merged into main by **dave_manager** to unlock the staging pipelines for a demo. This bypassed a critical CodeQL scan. Corrected by **alice_dev** in **9c2041e**.`);
       }
     } else {
-      setAiAnswer(`### 📂 S3 Storage Sync Cleanup Incident Report
+      setAiAnswer(`### 📂 S3 Storage Sync Cleanup Report
 
 **1. Why was the function deleted?**
 The helper function \`pruneStaleS3Backups()\` was deleted in commit **1f4e5a9** by **bob_ops** during a general house-cleaning task requested by **dave_manager** (**Issue #315**). Because the file had no explicit static imports inside the main Node bundle, Bob assumed it was obsolete code.
@@ -692,12 +692,12 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
 
   // Sidebar Menu Definitions
   const navigationItems = [
-    { id: "dashboard", label: "Overview Hub", icon: <LayoutDashboard size={13} /> },
-    { id: "repository", label: "Repo Integrations", icon: <FolderGit size={13} /> },
-    { id: "timeline", label: "Incident Timeline", icon: <Clock size={13} /> },
-    { id: "evidence", label: "Forensic Evidence", icon: <FileLock2 size={13} /> },
-    { id: "ask_ai", label: "Ask Forensic AI", icon: <Sparkles size={13} /> },
-    { id: "settings", label: "Workspace Settings", icon: <Settings2 size={13} /> }
+    { id: "dashboard", label: "Dashboard", icon: <span className="text-sm">🏠</span> },
+    { id: "repository", label: "Connect Repos", icon: <span className="text-sm">🔗</span> },
+    { id: "timeline", label: "Timeline", icon: <span className="text-sm">🕒</span> },
+    { id: "evidence", label: "Why It Changed", icon: <span className="text-sm">📄</span> },
+    { id: "ask_ai", label: "Ask AI", icon: <span className="text-sm">🤖</span> },
+    { id: "settings", label: "Settings", icon: <span className="text-sm">⚙️</span> }
   ] as const;
 
   return (
@@ -714,9 +714,9 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
               </div>
               <div className="text-left">
                 <h1 className="text-xs font-bold tracking-tight text-white font-display uppercase">
-                  Chronos Forensics
+                  Knowledge Time Machine
                 </h1>
-                <span className="text-[8px] font-mono text-slate-500 uppercase">Forensic Core v1.5</span>
+                <span className="text-[8px] font-mono text-slate-500 uppercase">SaaS Core v1.5</span>
               </div>
             </div>
             
@@ -782,7 +782,7 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
           {/* Core Server Status */}
           <div className="text-[9px] font-mono text-left space-y-1">
             <div className="flex justify-between items-center text-slate-600">
-              <span>STATION STATE:</span>
+              <span>SERVER STATUS:</span>
               {serverHealth === "online" ? (
                 <span className="text-emerald-400 font-bold flex items-center gap-1">
                   <span className="w-1 h-1 rounded-full bg-emerald-400 animate-ping" /> ONLINE
@@ -793,7 +793,7 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
             </div>
 
             <div className="flex justify-between items-center text-slate-600">
-              <span>AI SEMANTIC:</span>
+              <span>AI ASSISTANT:</span>
               {apiKeyActive ? (
                 <span className="text-emerald-400 font-bold">ACTIVE</span>
               ) : (
@@ -818,7 +818,7 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
 
             {/* Breadcrumb path */}
             <div className="flex items-center gap-1 text-[10px] font-mono text-slate-500">
-              <span className="hover:text-slate-300 transition-colors cursor-pointer">CHRONOS_SaaS</span>
+              <span className="hover:text-slate-300 transition-colors cursor-pointer">TIME_MACHINE</span>
               <ChevronRight size={10} />
               <span className="text-indigo-400 font-extrabold uppercase">
                 {navigationItems.find(n => n.id === currentPage)?.label || currentPage}
@@ -826,11 +826,11 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
             </div>
           </div>
 
-          {/* Global Incident Workspace Selector Dropdown */}
+          {/* Global Scenario Selector Dropdown */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 bg-slate-900/80 border border-slate-800 rounded-lg p-1 px-2">
               <label className="text-[9px] font-mono text-slate-500 font-bold uppercase mr-1 hidden sm:inline-block">
-                Workspace Focus:
+                Active Scenario:
               </label>
               
               <select
@@ -843,7 +843,7 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
               >
                 {scenarios.map((sc) => (
                   <option key={sc.id} value={sc.id} className="bg-slate-950 text-slate-300 text-xs font-sans">
-                    Incident: {sc.name}
+                    Scenario: {sc.name}
                   </option>
                 ))}
               </select>
@@ -854,7 +854,7 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
               onClick={() => setCurrentPage("landing")}
               className="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer"
             >
-              Close Console
+              Exit App
             </button>
           </div>
         </header>
@@ -865,9 +865,9 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
             <div className="flex items-start gap-2.5 text-left">
               <ShieldAlert size={15} className="shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold">Missing Workspace Secret API Keys</span>
+                <span className="font-bold">Missing Gemini API Key</span>
                 <p className="text-slate-400 mt-0.5">
-                  Set your <code className="text-amber-400 font-mono bg-amber-500/5 px-1 rounded">GEMINI_API_KEY</code> inside the <b>Workspace Settings</b> panel to run live semantic searches.
+                  Set your <code className="text-amber-400 font-mono bg-amber-500/5 px-1 rounded">GEMINI_API_KEY</code> inside the <b>Settings</b> panel to run live AI analysis.
                 </p>
               </div>
             </div>
@@ -903,13 +903,13 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
               <div className="space-y-6">
                 <div className="text-left border-b border-slate-900 pb-4">
                   <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wider block">
-                    Source Code Connectors
+                    CONNECTIONS
                   </span>
                   <h2 className="text-lg font-display font-bold text-slate-100 mt-0.5">
-                    Git Ingestion Pipelines
+                    Connect Repos
                   </h2>
                   <p className="text-[11px] text-slate-400">
-                    Solder live accounts. Authenticate with GitHub to ingest real-time code check-ins, PR comments, and issues.
+                    Connect and manage GitHub repositories.
                   </p>
                 </div>
 
@@ -940,13 +940,13 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                 <div className="text-left border-b border-slate-900 pb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                   <div>
                     <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wider block">
-                      Chronological Reconstruction
+                      CHRONOLOGY
                     </span>
                     <h2 className="text-lg font-display font-bold text-slate-100 mt-0.5">
-                      Incident Forensic Timeline
+                      Timeline
                     </h2>
                     <p className="text-[11px] text-slate-400">
-                      Explore the exact sequence of events from commit triggers, build failures, approvals, and dynamic Lambda calls.
+                      View the history of commits, pull requests, issues, and code changes.
                     </p>
                   </div>
                   
@@ -960,7 +960,7 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                           : "text-slate-500 hover:text-slate-300"
                       }`}
                     >
-                      PRESET INCIDENTS
+                      PRESET SCENARIOS
                     </button>
                     <button
                       onClick={() => {
@@ -975,7 +975,7 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                           : "text-slate-500 hover:text-slate-300"
                       }`}
                     >
-                      LIVE REPOS
+                      CONNECTED REPOS
                     </button>
                   </div>
                 </div>
@@ -1013,18 +1013,18 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
               />
             )}
 
-            {/* ASK FORENSIC AI PAGE (ChatGPT style chat, grounding documents and pipeline tracking) */}
+            {/* ASK AI PAGE */}
             {currentPage === "ask_ai" && (
               <div className="space-y-6 text-left">
                 <div className="border-b border-slate-900 pb-4">
                   <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wider block">
-                    Forensic Grounded Knowledge Copilot
+                    AI ASSISTANT
                   </span>
                   <h2 className="text-lg font-display font-bold text-slate-100 mt-0.5">
-                    Ask the Decision Database Engine
+                    Ask AI
                   </h2>
                   <p className="text-[11px] text-slate-400">
-                    Formulate queries about backend modifications, pipeline breaks, or backdoors. Grounded completely via ChromaDB semantic vector retrieval.
+                    Ask questions about the repository in natural language and get AI-powered explanations.
                   </p>
                 </div>
 
@@ -1032,10 +1032,10 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                 <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
                   <div className="space-y-1">
                     <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">
-                      Forensic Query Console
+                      Ask Questions
                     </span>
                     <p className="text-[10px] text-slate-400">
-                      Query why files were changed, what caused build memory errors, or which branches bypass static checks.
+                      Ask why lines of code were modified, who worked on them, or how things are connected.
                     </p>
                   </div>
 
@@ -1093,15 +1093,15 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                         </div>
                         <div>
                           <h3 className="text-xs font-sans font-bold text-slate-100">
-                            Forensic Investigation Response
+                            AI Explanation
                           </h3>
                           <p className="text-[10px] font-mono text-slate-500">
-                            System Model: {apiKeyActive ? "gemini-3.5-flash (Grounded)" : "Immutable Local DB Parser"}
+                            Model: {apiKeyActive ? "gemini-3.5-flash" : "Local search fallback"}
                           </p>
                         </div>
                       </div>
                       <span className="text-[9px] font-mono px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">
-                        GROUNDED PROOF SECURED
+                        AI-POWERED ANSWERS
                       </span>
                     </div>
 
@@ -1111,7 +1111,7 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
 
                     {matchingEntities.length > 0 && (
                       <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 pt-1">
-                        <span>GRAPH CORRELATIONS:</span>
+                        <span>CONNECTED ENTITIES:</span>
                         <div className="flex gap-1 flex-wrap">
                           {matchingEntities.map((ent) => (
                             <span key={ent} className="bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 text-[9px]">
@@ -1126,7 +1126,7 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                     {retrievedDocs && retrievedDocs.length > 0 && (
                       <div className="border-t border-slate-800/80 pt-4 mt-4 space-y-3">
                         <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">
-                          Retrieved Ground Truth Documents (ChromaDB Vector + BM25 Keyword Hybrid RAG)
+                          Supporting Information (Search Results)
                         </span>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
