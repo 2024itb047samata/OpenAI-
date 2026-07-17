@@ -49,6 +49,7 @@ import PipelineWorkflow from "./components/PipelineWorkflow";
 import KnowledgeGraphView from "./components/KnowledgeGraphView";
 import InteractiveTimeline from "./components/InteractiveTimeline";
 import ConnectorIntegrations from "./components/ConnectorIntegrations";
+import AiReportPanel from "./components/AiReportPanel";
 
 // Modular SaaS pages
 import LandingPage from "./components/LandingPage";
@@ -1010,6 +1011,10 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                   );
                   if (matchedEvt) setSelectedEventId(matchedEvt.id);
                 }}
+                currentScenario={currentScenario}
+                scenarioEvents={scenarioEvents}
+                selectedEventId={selectedEventId}
+                onSelectEvent={setSelectedEventId}
               />
             )}
 
@@ -1060,10 +1065,11 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
 
                   {/* Suggestions pills */}
                   {!isLiveMode && (
-                    <div className="flex flex-wrap items-center gap-2 pt-1">
-                      <span className="text-[9px] font-mono text-slate-600 uppercase font-bold mr-1">
-                        SUGGESTED PILOTS:
-                      </span>
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[10px]">
+                      <div className="flex items-center gap-1 text-slate-500 font-mono text-[9px] font-bold uppercase mr-1">
+                        <HelpCircle size={11} className="text-indigo-400 animate-pulse" />
+                        <span>SUGGESTED CHIPS:</span>
+                      </div>
                       {currentScenario.defaultQuestions.map((q) => (
                         <button
                           key={q}
@@ -1071,7 +1077,7 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                             setSearchQuery(q);
                             runReconstruction(q);
                           }}
-                          className="text-[9px] font-mono bg-slate-950 hover:bg-slate-950/80 px-2.5 py-1 rounded border border-slate-850 hover:border-slate-800 text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
+                          className="text-[10px] font-mono bg-slate-950 hover:bg-slate-900 px-3 py-1 rounded-full border border-slate-850 hover:border-indigo-500/30 text-slate-400 hover:text-indigo-400 shadow-[0_2px_4px_rgba(0,0,0,0.2)] transition-all duration-200 cursor-pointer hover:translate-y-[-0.5px]"
                         >
                           {q}
                         </button>
@@ -1085,49 +1091,33 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
 
                 {/* AI report panel */}
                 {aiAnswer && (
-                  <div className="bg-slate-900 border border-indigo-500/20 rounded-xl p-5 shadow-xl bg-gradient-to-br from-slate-900 to-indigo-950/20 space-y-4">
-                    <div className="flex justify-between items-center border-b border-indigo-500/10 pb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-indigo-500/10 rounded-md text-indigo-400">
-                          <Sparkles size={14} className="animate-pulse" />
-                        </div>
-                        <div>
-                          <h3 className="text-xs font-sans font-bold text-slate-100">
-                            AI Explanation
-                          </h3>
-                          <p className="text-[10px] font-mono text-slate-500">
-                            Model: {apiKeyActive ? "gemini-3.5-flash" : "Local search fallback"}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-[9px] font-mono px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">
-                        AI-POWERED ANSWERS
-                      </span>
-                    </div>
-
-                    <div className="bg-slate-950/40 p-5 rounded-lg border border-slate-800/60 leading-relaxed select-text font-sans">
-                      <MarkdownRenderer text={aiAnswer} />
-                    </div>
-
-                    {matchingEntities.length > 0 && (
-                      <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 pt-1">
-                        <span>CONNECTED ENTITIES:</span>
-                        <div className="flex gap-1 flex-wrap">
-                          {matchingEntities.map((ent) => (
-                            <span key={ent} className="bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 text-[9px]">
-                              {ent}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                  <div className="space-y-6">
+                    <AiReportPanel
+                      aiAnswer={aiAnswer}
+                      currentScenario={currentScenario}
+                      scenarioEvents={scenarioEvents}
+                      apiKeyActive={apiKeyActive}
+                      matchingEntities={matchingEntities}
+                      retrievedDocs={retrievedDocs}
+                      searchQuery={searchQuery}
+                      onNavigateToTimeline={() => setCurrentPage("timeline")}
+                      onRegenerate={() => runReconstruction(searchQuery)}
+                    />
 
                     {/* Retrieved document chunks (from hybrid search) */}
                     {retrievedDocs && retrievedDocs.length > 0 && (
-                      <div className="border-t border-slate-800/80 pt-4 mt-4 space-y-3">
-                        <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">
-                          Supporting Information (Search Results)
-                        </span>
+                      <div
+                        id="supporting-information-section"
+                        className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4"
+                      >
+                        <div className="border-b border-slate-800 pb-3">
+                          <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">
+                            Supporting Hybrid-Search Indexes (Retrieved Blocks)
+                          </span>
+                          <p className="text-[10px] text-slate-400 mt-0.5">
+                            Raw semantic vectors matches and BM25 lexicons queried live from Knowledge Base.
+                          </p>
+                        </div>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {retrievedDocs.map((doc, idx) => {
@@ -1140,7 +1130,7 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                             const typeColor = entityTypeColors[doc.entityType] || "border-slate-800 bg-slate-900/40 text-slate-400";
                             
                             return (
-                              <div key={doc.id || idx} className="p-3 bg-slate-950/60 border border-slate-800 rounded-lg text-left space-y-2 hover:border-indigo-500/30 transition-colors">
+                              <div key={doc.id || idx} className="p-3 bg-slate-950/60 border border-slate-850 rounded-lg text-left space-y-2 hover:border-indigo-500/30 transition-all duration-200">
                                 <div className="flex justify-between items-start gap-2">
                                   <div className="flex items-center gap-1.5">
                                     <span className={`text-[8px] font-bold font-mono px-1.5 py-0.5 rounded uppercase border ${typeColor}`}>
