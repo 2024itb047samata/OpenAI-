@@ -651,7 +651,7 @@ export default function EvidencePage({
               <div>
                 <span className="font-bold uppercase">SHA-256 SECURE LOCK SIGNED</span>
                 <p className="text-slate-400 text-[9px] mt-0.5">
-                  Metadata verified via cryptographically signed hashes in current Time Machine instance.
+                  Metadata verified via cryptographically signed hashes in current CodeStory instance.
                 </p>
               </div>
             </div>

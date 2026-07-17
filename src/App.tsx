@@ -223,12 +223,12 @@ export default function App() {
 
   // Pipeline stages progress state
   const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>([
-    { id: "ingestion", name: "GitHub Ingestion", description: "Fetch issues/PRs/commits", status: "idle" },
-    { id: "extraction", name: "Event Extraction", description: "Parse NLP structures", status: "idle" },
-    { id: "graph", name: "Knowledge Graph", description: "Solder nodes & relations", status: "idle" },
-    { id: "vector", name: "Vector Indexing", description: "Embed semantic context", status: "idle" },
-    { id: "timeline", name: "Timeline Splice", description: "Reconstruct incident flow", status: "idle" },
-    { id: "llm", name: "AI Synthesis", description: "Formulate analytical summary", status: "idle" }
+    { id: "ingestion", name: "Indexing repository...", description: "Fetch issues, PRs, and commits", status: "idle" },
+    { id: "extraction", name: "Understanding code evolution...", description: "Parse event metadata structures", status: "idle" },
+    { id: "graph", name: "Reconstructing repository history...", description: "Solder nodes & relationships", status: "idle" },
+    { id: "vector", name: "Finding related commits...", description: "Embed semantic vector context", status: "idle" },
+    { id: "timeline", name: "Building engineering timeline...", description: "Reconstruct chronological flow", status: "idle" },
+    { id: "llm", name: "Generating AI insights...", description: "Synthesize forensic findings", status: "idle" }
   ]);
   const [activeStageId, setActiveStageId] = useState<string | null>(null);
 
@@ -603,7 +603,7 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: `USER QUERY: ${queryText}\nSCENARIO NAME: ${currentScenario.name}`,
-          systemInstruction: `You are the Knowledge Time Machine AI assistant. Explain the timelines and underlying reasons why changes or regressions occurred based on WORKFLOW_EVENTS. Current: ${JSON.stringify(scenarioEvents, null, 2)}`,
+          systemInstruction: `You are the CodeStory AI assistant. Explain the timelines and underlying reasons why changes or regressions occurred based on WORKFLOW_EVENTS. Current: ${JSON.stringify(scenarioEvents, null, 2)}`,
           model: "gemini-3.5-flash",
           temperature: 0.1
         })
@@ -714,10 +714,10 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                 <Clock className="w-4.5 h-4.5 animate-pulse" />
               </div>
               <div className="text-left">
-                <h1 className="text-xs font-bold tracking-tight text-white font-display uppercase">
-                  Knowledge Time Machine
+                <h1 className="text-sm font-black tracking-tight text-white font-display uppercase">
+                  CodeStory
                 </h1>
-                <span className="text-[8px] font-mono text-slate-500 uppercase">SaaS Core v1.5</span>
+                <span className="text-[8px] font-mono text-indigo-400 uppercase tracking-wider block">Every Commit Has a Story.</span>
               </div>
             </div>
             

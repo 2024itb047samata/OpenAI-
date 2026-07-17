@@ -71,7 +71,7 @@ export default function DashboardPage({
               Welcome back, {githubUser?.name || githubUser?.login || "Engineer"}
             </h2>
             <p className="text-[11px] text-slate-400 max-w-xl">
-              Knowledge Time Machine has mapped your repository integrations. All systems are operational.
+              CodeStory has mapped your repository integrations. All systems are operational.
             </p>
           </div>
           

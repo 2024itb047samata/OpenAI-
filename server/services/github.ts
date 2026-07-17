@@ -4,7 +4,7 @@ export class GitHubService {
   private getHeaders(token?: string): Record<string, string> {
     const headers: Record<string, string> = {
       Accept: "application/vnd.github+json",
-      "User-Agent": "Knowledge-Time-Machine-Forensics",
+      "User-Agent": "CodeStory-Forensics",
     };
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;

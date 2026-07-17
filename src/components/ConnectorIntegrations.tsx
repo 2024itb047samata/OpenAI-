@@ -198,17 +198,17 @@ export default function ConnectorIntegrations({
       jira: {
         title: "Atlassian Jira Platform Authorization",
         permissions: ["Read project issue metadata and status workflows", "Query epic details and task relationships", "Trace historical activity logs and timelines"],
-        scopeDesc: "This grants the Knowledge Time Machine read-only query capabilities across your Jira projects to map timeline events."
+        scopeDesc: "This grants CodeStory read-only query capabilities across your Jira projects to map timeline events."
       },
       slack: {
         title: "Slack Workspace Integration Protocol",
         permissions: ["Access channel lists and public communication threads", "Parse incident alerts from integrated monitoring bots", "Extract text conversations to find design summaries"],
-        scopeDesc: "Authorize Knowledge Time Machine to retrieve chat threads within permitted channels for chronological context mining."
+        scopeDesc: "Authorize CodeStory to retrieve chat threads within permitted channels for chronological context mining."
       },
       notion: {
         title: "Notion Workspace Database Sync",
         permissions: ["Access specific page trees and engineering directories", "Read design specification tables and logs", "Ingest documentation summaries"],
-        scopeDesc: "Connect Knowledge Time Machine to scan Notion pages to locate design decisions and system specifications."
+        scopeDesc: "Connect CodeStory to scan Notion pages to locate design decisions and system specifications."
       }
     };
 
@@ -390,14 +390,16 @@ export default function ConnectorIntegrations({
             {!isGitHubConnected ? (
               <div className="space-y-4">
                 {/* 4. PREMIUM GITHUB TRUST DISCLAIMER CARD */}
-                <div className="bg-slate-950 border border-indigo-500/15 rounded-xl p-4 space-y-3 shadow-md bg-gradient-to-br from-slate-950 to-indigo-950/10">
-                  <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold font-sans">
-                    <ShieldCheck size={16} className="text-indigo-400 animate-pulse" />
-                    <span>Security & Trust Protocol (OAuth Read-Only Safeguard)</span>
+                <div className="bg-slate-950 border border-indigo-500/15 rounded-xl p-5 space-y-4 shadow-md bg-gradient-to-br from-slate-950 to-indigo-950/10">
+                  <div className="flex items-center gap-2 text-indigo-400 text-sm font-bold font-sans">
+                    <ShieldCheck size={18} className="text-indigo-400 animate-pulse" />
+                    <span>Your repository stays private.</span>
                   </div>
 
-                  <p className="text-[10.5px] font-mono leading-relaxed text-slate-400">
-                    Before linking your GitHub account, understand what metadata structures the Knowledge Time Machine requires to map incidents and timeline events:
+                  <p className="text-[11px] leading-relaxed text-slate-300 font-sans">
+                    CodeStory only reads repository metadata required to reconstruct engineering history.
+                    It never pushes commits, edits code, creates branches, or modifies your repository.
+                    Your repositories remain private and you can disconnect access at any time.
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-[10px] font-mono">
@@ -432,7 +434,7 @@ export default function ConnectorIntegrations({
                       className="mt-0.5 w-4.5 h-4.5 rounded border-slate-800 text-indigo-600 focus:ring-indigo-500 bg-slate-950"
                     />
                     <label htmlFor="accept-github-disclaimer" className="text-[10px] font-mono text-slate-400 leading-normal cursor-pointer">
-                      I authorize Knowledge Time Machine to retrieve, index, and cache repository metadata for analytical incident reconstruction.
+                      I authorize CodeStory to retrieve, index, and cache repository metadata for analytical incident reconstruction.
                     </label>
                   </div>
                 </div>

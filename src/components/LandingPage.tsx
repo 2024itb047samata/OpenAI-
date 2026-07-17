@@ -544,7 +544,7 @@ Corrected by **alice_dev** in commit **fa9c12a** by restoring the function and a
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse" />
             <span className="text-xs font-mono font-bold text-slate-300">
-              TIME MACHINE INVESTIGATION RECONSTRUCT DEMO
+              CODESTORY INVESTIGATION RECONSTRUCT DEMO
             </span>
           </div>
           <button
@@ -681,7 +681,7 @@ Corrected by **alice_dev** in commit **fa9c12a** by restoring the function and a
         {/* Footer actions */}
         <div className="px-6 py-4 border-t border-slate-800 flex items-center justify-between shrink-0 bg-slate-950/40">
           <span className="text-[10px] font-mono text-slate-500">
-            Traced via Time Machine Core Sandbox Engine
+            Traced via CodeStory Core Sandbox Engine
           </span>
           <div className="flex gap-2">
             <button
@@ -850,7 +850,7 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
   const [showDemo, setShowDemo] = useState(false);
 
   return (
-    <div className="relative min-h-screen bg-transparent text-slate-100 overflow-x-hidden flex flex-col font-sans selection:bg-indigo-500/30 selection:text-white" id="knowledge-time-machine-universe">
+    <div className="relative min-h-screen bg-transparent text-slate-100 overflow-x-hidden flex flex-col font-sans selection:bg-indigo-500/30 selection:text-white" id="codestory-universe">
       
       {/* 1. CUSTOM KEYFRAME CSS STYLES */}
       <style>{`
@@ -921,10 +921,10 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
           </div>
           <div className="text-left">
             <span className="text-xs font-extrabold font-display tracking-tight text-white uppercase block">
-              Knowledge Time Machine
+              CodeStory
             </span>
-            <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest block">
-              SaaS Engine Core v1.5
+            <span className="text-[8px] font-mono text-indigo-400 uppercase tracking-widest block">
+              Every Commit Has a Story.
             </span>
           </div>
         </div>
@@ -976,11 +976,17 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
               transition={{ duration: 0.8, delay: 0.15, type: "spring" }}
               className="text-4xl sm:text-5xl md:text-6.5xl font-display font-black tracking-tight text-slate-100 leading-[1.08] text-glow bg-gradient-to-br from-white via-white to-slate-400 text-transparent bg-clip-text text-center lg:text-left"
             >
-              Every Commit <br />
-              <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-transparent bg-clip-text font-black">
-                Has a Story.
-              </span>
+              CodeStory
             </motion.h1>
+
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-sm sm:text-base font-bold tracking-widest text-indigo-400 font-mono uppercase block text-center lg:text-left"
+            >
+              "Every Commit Has a Story."
+            </motion.div>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -988,7 +994,7 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
               transition={{ duration: 0.8, delay: 0.3 }}
               className="text-sm sm:text-base text-slate-400 leading-relaxed font-sans max-w-2xl text-center lg:text-left"
             >
-              Knowledge Time Machine reconstructs the engineering decisions behind every code change using AI. Solder issue tracking logs, pull requests, and commit logs into an offline relationship graph.
+              Understand the complete story behind every engineering decision using AI-powered timeline reconstruction, repository intelligence, and contextual search.
             </motion.p>
 
             {/* CTA Buttons */}
@@ -1002,7 +1008,7 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
                 onClick={onLaunch}
                 className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold font-sans tracking-wide transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_25px_rgba(99,102,241,0.35)] hover:scale-[1.02]"
               >
-                <span>✨ Start Exploring</span>
+                <span>✨ Analyze Repository</span>
                 <ArrowRight size={14} />
               </button>
               
@@ -1011,7 +1017,7 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
                 className="px-8 py-4 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-bold font-sans border border-slate-800 hover:border-slate-700 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer backdrop-blur-sm"
               >
                 <Play size={11} className="text-indigo-400 fill-indigo-400" />
-                <span>▶ Watch Demo</span>
+                <span>Watch Demo</span>
               </button>
             </motion.div>
 
@@ -1068,7 +1074,7 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
               Interactive Reasoning Sandbox
             </h3>
             <p className="text-xs text-slate-400">
-              Run simulated forensic traces below to see how Knowledge Time Machine parses metadata relations to resolve mystery regressions in seconds.
+              Run simulated forensic traces below to see how CodeStory parses metadata relations to resolve mystery regressions in seconds.
             </p>
           </div>
 
@@ -1171,7 +1177,7 @@ export default function LandingPage({ onLaunch, serverHealth, apiKeyActive }: La
             <ShieldCheck size={12} className="text-indigo-500/50" />
             <span>Compliant with Lock-ID-77291 Sandbox Cryptography</span>
           </div>
-          <p>&copy; 2026 Knowledge Time Machine Inc. • Inspired by Figma Config 2025, Vercel, Linear, and Interstellar.</p>
+          <p>&copy; 2026 CodeStory Inc. • Inspired by Figma Config 2025, Vercel, Linear, and Interstellar.</p>
         </footer>
       </div>
     </div>

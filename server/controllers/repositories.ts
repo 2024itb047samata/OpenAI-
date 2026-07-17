@@ -124,7 +124,7 @@ export class RepositoryController {
       const contextText = vectorService.prepareLlmContext(matches);
 
       const systemInstruction = `
-You are the Knowledge Time Machine forensic AI analyzer.
+You are the CodeStory forensic AI analyzer.
 You help engineering teams understand the "WHY" behind code changes (historical decisions, architectural tradeoffs, budget limits, manager bypasses) rather than just "WHAT" lines changed.
 
 We performed a hybrid retrieval (semantic vector search in ChromaDB combined with BM25 keyword search) over the ingested database of GitHub history for ${repoId}.
