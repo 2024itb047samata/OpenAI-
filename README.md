@@ -1,20 +1,166 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+
+# 📖 CodeStory
+
+### Every Commit Has a Story.
+
+AI-powered repository intelligence that reconstructs the story behind your codebase using commits, pull requests, issues, releases, and AI-generated insights.
+
 </div>
 
-# Run and deploy your AI Studio app
+---
 
-This contains everything you need to run your app locally.
+## 🚀 Overview
 
-View your app in AI Studio: https://ai.studio/apps/194552ee-2068-46f0-82c7-826fff841fb0
+Understanding *what* changed in a repository is easy. Understanding *why* it changed is much harder.
 
-## Run Locally
+CodeStory transforms GitHub repositories into interactive timelines, allowing developers to trace engineering decisions, investigate incidents, onboard faster, and ask natural language questions about their codebase.
 
-**Prerequisites:**  Node.js
+---
 
+## ✨ Features
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- 🧠 AI-powered repository analysis
+- 📜 Interactive engineering timeline
+- 🔍 Natural language repository search
+- 🔗 GitHub repository integration
+- 📂 Commit, PR, Issue & Release tracking
+- 📊 Repository evolution visualization
+- 📑 File-level change summaries
+- ⚡ Context-aware engineering insights
+
+---
+
+## 💬 Ask Questions Like
+
+- Why was this feature introduced?
+- Which commit added authentication?
+- What changed before this release?
+- Which PR fixed this bug?
+- Explain the history of this module.
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend**
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+
+**Backend**
+
+- Node.js
+- Express
+
+**AI**
+
+- Google Gemini
+
+**Integrations**
+
+- GitHub API
+- GitHub OAuth
+
+---
+
+## 📂 Project Structure
+
+```
+.
+├── src/
+├── server/
+├── public/
+├── package.json
+└── README.md
+```
+
+---
+
+## 🚀 Getting Started
+
+Clone the repository
+
+```bash
+git clone https://github.com/<your-username>/CodeStory.git
+```
+
+Navigate to the project
+
+```bash
+cd CodeStory
+```
+
+Install dependencies
+
+```bash
+npm install
+```
+
+Start the development server
+
+```bash
+npm run dev
+```
+
+---
+
+## 📸 Screenshots
+
+- Landing Page
+- Repository Dashboard
+- Interactive Timeline
+- Ask AI
+- Repository Insights
+
+---
+
+## 🎯 Use Cases
+
+- Developer onboarding
+- Code archaeology
+- Incident investigation
+- Repository exploration
+- Knowledge transfer
+- Engineering documentation
+
+---
+
+## 🚀 Roadmap
+
+- Slack Integration
+- Jira Integration
+- Notion Integration
+- Multi-repository analysis
+- AI-generated release notes
+- Architecture visualization
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push the branch
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+Licensed under the MIT License.
+
+---
+
+<div align="center">
+
+### ⭐ Every Commit Has a Story.
+
+If you like this project, consider giving it a ⭐.
+
+</div>
