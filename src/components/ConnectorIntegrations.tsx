@@ -34,10 +34,12 @@ interface ConnectorIntegrationsProps {
   githubUser: any;
   customRepos: any[];
   onAddRepo: (owner: string, repo: string) => Promise<any>;
-  onIngestRepo: (owner: string, repo: string) => Promise<void>;
+  onIngestRepo: (repoId: string) => Promise<void>;
   onDisconnectGitHub: () => void;
   onSelectRepo: (repoId: string) => void;
   selectedCustomRepoId: string | null;
+  onIngestStart?: () => void;
+  onIngestEnd?: (errorMsg?: string) => void;
 }
 
 export default function ConnectorIntegrations({
@@ -50,7 +52,9 @@ export default function ConnectorIntegrations({
   onIngestRepo,
   onDisconnectGitHub,
   onSelectRepo,
-  selectedCustomRepoId
+  selectedCustomRepoId,
+  onIngestStart,
+  onIngestEnd
 }: ConnectorIntegrationsProps) {
   const [activeTab, setActiveTab] = useState<string>("github");
   const [ownerInput, setOwnerInput] = useState<string>("");
@@ -150,6 +154,7 @@ export default function ConnectorIntegrations({
   const handleTriggerIngestion = async (repoId: string) => {
     setIngestionStatuses((prev) => ({ ...prev, [repoId]: "running" }));
     setIngestionLogs((prev) => ({ ...prev, [repoId]: "Initializing GitHub Ingestion pipeline...\n" }));
+    if (onIngestStart) onIngestStart();
 
     try {
       const updateLogs = (msg: string) => {
@@ -176,19 +181,23 @@ export default function ConnectorIntegrations({
       });
 
       if (!res.ok) {
-        throw new Error("Ingestion API returned failed status");
+        const errData = await res.json();
+        throw new Error(errData.details || errData.error || "Ingestion API returned failed status");
       }
 
       const data = await res.json();
       updateLogs(`[OK] Successfully ingested:\n - ${data.counts.commits} Commits\n - ${data.counts.prs} Pull Requests\n - ${data.counts.issues} Issues\n - ${data.counts.reviews} Review Comments`);
       
       setIngestionStatuses((prev) => ({ ...prev, [repoId]: "success" }));
+      await onIngestRepo(repoId);
+      if (onIngestEnd) onIngestEnd();
     } catch (err: any) {
       setIngestionStatuses((prev) => ({ ...prev, [repoId]: "failed" }));
       setIngestionLogs((prev) => ({
         ...prev,
         [repoId]: (prev[repoId] || "") + `[ERROR] Pipeline crashed: ${err.message}\nEnsure your GEMINI_API_KEY is configured.`,
       }));
+      if (onIngestEnd) onIngestEnd(err.message);
     }
   };
 

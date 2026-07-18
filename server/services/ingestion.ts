@@ -23,8 +23,18 @@ export class IngestionService {
 
     // Step 1: Fetch data from GitHub API
     const commits = await gitHubService.fetchCommits(owner, repo, accessToken);
-    const issues = await gitHubService.fetchIssues(owner, repo, accessToken);
     const prs = await gitHubService.fetchPullRequests(owner, repo, accessToken);
+    const issues = await gitHubService.fetchIssues(owner, repo, accessToken);
+    const branches = await gitHubService.fetchBranches(owner, repo, accessToken);
+    const releases = await gitHubService.fetchReleases(owner, repo, accessToken);
+
+    // Requirement 2: Log the number of objects returned from each GitHub API endpoint in requested format
+    console.log(`\n[GitHub Ingestion Pipeline Summary for ${repoId}]:`);
+    console.log(`Commits: ${commits.length}`);
+    console.log(`Pull Requests: ${prs.length}`);
+    console.log(`Issues: ${issues.length}`);
+    console.log(`Branches: ${branches.length}`);
+    console.log(`Releases: ${releases.length}\n`);
 
     // Step 2: Save to DB
     await db.saveCommits(commits);
@@ -93,6 +103,8 @@ export class IngestionService {
       issues: issues.length,
       prs: prs.length,
       reviews: allReviews.length,
+      branches: branches.length,
+      releases: releases.length,
     };
   }
 }

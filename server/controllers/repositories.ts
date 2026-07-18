@@ -41,6 +41,18 @@ export class RepositoryController {
       );
       await db.saveRepository(repoMetadata);
 
+      // Immediately ingest the repository to fetch commits, issues, PRs, branches, and releases
+      try {
+        console.log(`[RepositoryController] Immediately triggering ingestion for registered repository ${cleanOwner}/${cleanRepo}`);
+        await ingestionService.ingestRepository(
+          cleanOwner,
+          cleanRepo,
+          authSession.getAccessToken() || undefined
+        );
+      } catch (ingestErr: any) {
+        console.error(`[RepositoryController] Immediate ingestion failed during registration:`, ingestErr);
+      }
+
       return res.status(201).json({
         message: "Repository added successfully.",
         repository: repoMetadata,

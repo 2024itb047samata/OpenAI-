@@ -1,0 +1,84 @@
+[
+  {
+    "id": "503a979e14e60a7a73fc6fd5423e5a1f4f0173cc",
+    "repoId": "2024itb047samata/openai",
+    "sha": "503a979e14e60a7a73fc6fd5423e5a1f4f0173cc",
+    "message": "feat: add authentication routing and refine UI typography\n\n- Add login/signup/forgot-password route handling\n- Update global font stack to Geist and Instrument Sans\n- Improve UI font weights and text styling consistency",
+    "authorName": "Samata Bag",
+    "authorEmail": "2024itb047.samata@students.iiests.ac.in",
+    "createdAt": "2026-07-18T06:38:16Z",
+    "parents": [
+      "60665c9369f4190ae1b4357f395d5d73550ea32a"
+    ]
+  },
+  {
+    "id": "60665c9369f4190ae1b4357f395d5d73550ea32a",
+    "repoId": "2024itb047samata/openai",
+    "sha": "60665c9369f4190ae1b4357f395d5d73550ea32a",
+    "message": "rebrand: rename project to CodeStory\n\nUpdate application branding, UI labels, and user-facing copy from \"Knowledge Time Machine\" to \"CodeStory\". Also, clarify pipeline stage descriptions for improved UX.",
+    "authorName": "Samata Bag",
+    "authorEmail": "2024itb047.samata@students.iiests.ac.in",
+    "createdAt": "2026-07-17T10:33:08Z",
+    "parents": [
+      "86bbad3f55d5e341c864f338d7a95c1fa5ddb695"
+    ]
+  },
+  {
+    "id": "86bbad3f55d5e341c864f338d7a95c1fa5ddb695",
+    "repoId": "2024itb047samata/openai",
+    "sha": "86bbad3f55d5e341c864f338d7a95c1fa5ddb695",
+    "message": "feat: enhance timeline UI and landing page design\n\n- Integrate AiReportPanel and add advanced filtering to InteractiveTimeline\n- Revamp LandingPage with motion effects and spotlight cards\n- Expand ConnectorIntegrations with OAuth simulator and state management\n- Update UI icons and layout components across dashboard modules",
+    "authorName": "Samata Bag",
+    "authorEmail": "2024itb047.samata@students.iiests.ac.in",
+    "createdAt": "2026-07-17T10:07:21Z",
+    "parents": [
+      "5ace4dd63e925beab7dcf89ac7ccb8f3aa4e9210"
+    ]
+  },
+  {
+    "id": "5ace4dd63e925beab7dcf89ac7ccb8f3aa4e9210",
+    "repoId": "2024itb047samata/openai",
+    "sha": "5ace4dd63e925beab7dcf89ac7ccb8f3aa4e9210",
+    "message": "refactor: rebrand forensic terminology to AI-focused language\n\nUpdate UI copy and system instructions to use more standard AI-assistant terminology, shifting focus from \"forensics\" to general knowledge exploration and history search.",
+    "authorName": "Samata Bag",
+    "authorEmail": "2024itb047.samata@students.iiests.ac.in",
+    "createdAt": "2026-07-16T19:56:45Z",
+    "parents": [
+      "5c20b562450a56a5b09b9f29f9ea5cf54ffdbea6"
+    ]
+  },
+  {
+    "id": "5c20b562450a56a5b09b9f29f9ea5cf54ffdbea6",
+    "repoId": "2024itb047samata/openai",
+    "sha": "5c20b562450a56a5b09b9f29f9ea5cf54ffdbea6",
+    "message": "feat: refactor architecture and UI components\n\n- Modularize server routes\n- Add dashboard, landing, and evidence pages\n- Expand UI components with advanced event icons\n- Implement repository management and ingestion logic",
+    "authorName": "Samata Bag",
+    "authorEmail": "2024itb047.samata@students.iiests.ac.in",
+    "createdAt": "2026-07-16T09:04:35Z",
+    "parents": [
+      "f68f6beb3e284d2e361b5f3d68f9b003e0a8825d"
+    ]
+  },
+  {
+    "id": "f68f6beb3e284d2e361b5f3d68f9b003e0a8825d",
+    "repoId": "2024itb047samata/openai",
+    "sha": "f68f6beb3e284d2e361b5f3d68f9b003e0a8825d",
+    "message": "feat: implement core architecture for Knowledge Time Machine\n\nInitialize project structure with React, Vite, Express, and Google GenAI integration. Added base UI components, mock data presets, and local development configuration.",
+    "authorName": "Samata Bag",
+    "authorEmail": "2024itb047.samata@students.iiests.ac.in",
+    "createdAt": "2026-07-16T07:58:55Z",
+    "parents": [
+      "aedb1b330fb3b3b7d461ab7d7e001f4698128bb1"
+    ]
+  },
+  {
+    "id": "aedb1b330fb3b3b7d461ab7d7e001f4698128bb1",
+    "repoId": "2024itb047samata/openai",
+    "sha": "aedb1b330fb3b3b7d461ab7d7e001f4698128bb1",
+    "message": "Initial commit",
+    "authorName": "Samata Bag",
+    "authorEmail": "2024itb047.samata@students.iiests.ac.in",
+    "createdAt": "2026-07-16T07:58:35Z",
+    "parents": []
+  }
+]

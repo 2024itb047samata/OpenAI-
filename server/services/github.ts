@@ -105,6 +105,14 @@ export class GitHubService {
     }
 
     const data: any = await res.json();
+    console.log(`[GitHub API Response] Commits endpoint returned status ${res.status}, count: ${Array.isArray(data) ? data.length : 0}`);
+    if (Array.isArray(data) && data.length > 0) {
+      console.log(`[GitHub API Response] Sample commit:`, {
+        sha: data[0].sha,
+        message: data[0].commit?.message,
+        author: data[0].commit?.author?.name
+      });
+    }
     if (!Array.isArray(data)) return [];
 
     return data.map((item: any) => ({
@@ -135,6 +143,14 @@ export class GitHubService {
     }
 
     const data: any = await res.json();
+    console.log(`[GitHub API Response] Issues endpoint returned status ${res.status}, count: ${Array.isArray(data) ? data.length : 0}`);
+    if (Array.isArray(data) && data.length > 0) {
+      console.log(`[GitHub API Response] Sample issue/PR:`, {
+        number: data[0].number,
+        title: data[0].title,
+        is_pr: !!data[0].pull_request
+      });
+    }
     if (!Array.isArray(data)) return [];
 
     const issuesOnly = data.filter((item: any) => !item.pull_request);
@@ -168,6 +184,14 @@ export class GitHubService {
     }
 
     const data: any = await res.json();
+    console.log(`[GitHub API Response] PRs endpoint returned status ${res.status}, count: ${Array.isArray(data) ? data.length : 0}`);
+    if (Array.isArray(data) && data.length > 0) {
+      console.log(`[GitHub API Response] Sample PR:`, {
+        number: data[0].number,
+        title: data[0].title,
+        state: data[0].state
+      });
+    }
     if (!Array.isArray(data)) return [];
 
     return data.map((item: any) => ({
@@ -200,6 +224,7 @@ export class GitHubService {
     }
 
     const data: any = await res.json();
+    console.log(`[GitHub API Response] PR #${prNumber} Reviews returned status ${res.status}, count: ${Array.isArray(data) ? data.length : 0}`);
     if (!Array.isArray(data)) return [];
 
     return data.map((item: any) => ({
@@ -212,6 +237,52 @@ export class GitHubService {
       createdAt: item.submitted_at || new Date().toISOString(),
       commitId: item.commit_id || null,
     }));
+  }
+
+  /**
+   * Fetch branches
+   */
+  async fetchBranches(owner: string, repo: string, token?: string, limit = 30): Promise<any[]> {
+    console.log(`[GitHub] Fetching branches for ${owner}/${repo}`);
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches?per_page=${limit}`, {
+      headers: this.getHeaders(token),
+    });
+
+    if (!res.ok) {
+      console.warn(`[GitHub] Failed to fetch branches: ${res.statusText}`);
+      return [];
+    }
+
+    const data: any = await res.json();
+    console.log(`[GitHub API Response] Branches endpoint returned status ${res.status}, count: ${Array.isArray(data) ? data.length : 0}`);
+    if (Array.isArray(data) && data.length > 0) {
+      console.log(`[GitHub API Response] Sample branches:`, data.slice(0, 3).map((b: any) => b.name));
+    }
+    if (!Array.isArray(data)) return [];
+    return data;
+  }
+
+  /**
+   * Fetch releases
+   */
+  async fetchReleases(owner: string, repo: string, token?: string, limit = 30): Promise<any[]> {
+    console.log(`[GitHub] Fetching releases for ${owner}/${repo}`);
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases?per_page=${limit}`, {
+      headers: this.getHeaders(token),
+    });
+
+    if (!res.ok) {
+      console.warn(`[GitHub] Failed to fetch releases: ${res.statusText}`);
+      return [];
+    }
+
+    const data: any = await res.json();
+    console.log(`[GitHub API Response] Releases endpoint returned status ${res.status}, count: ${Array.isArray(data) ? data.length : 0}`);
+    if (Array.isArray(data) && data.length > 0) {
+      console.log(`[GitHub API Response] Sample releases:`, data.slice(0, 3).map((r: any) => r.name || r.tag_name));
+    }
+    if (!Array.isArray(data)) return [];
+    return data;
   }
 }
 

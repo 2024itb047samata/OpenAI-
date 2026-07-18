@@ -27,18 +27,49 @@ interface InteractiveTimelineProps {
   events: WorkflowEvent[];
   selectedEventId: string | null;
   onSelectEvent: (eventId: string) => void;
+  isIndexing?: boolean;
+  errorMessage?: string | null;
 }
 
 export default function InteractiveTimeline({
   events,
   selectedEventId,
   onSelectEvent,
+  isIndexing = false,
+  errorMessage = null,
 }: InteractiveTimelineProps) {
   const [expandedDiff, setExpandedDiff] = useState<Record<string, boolean>>({});
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   
   // Multi-stage filter toolbar state: all, code, alerts, discussions, deployments
   const [activeCategory, setActiveCategory] = useState<"all" | "code" | "alerts" | "discussions" | "deployments">("all");
+
+  // Requirement 8: Add debug logging for frontend rendering
+  console.log("[InteractiveTimeline Rendering] rendering with properties:", {
+    totalEvents: events.length,
+    filteredEventsCount: events.filter((evt) => {
+      if (activeCategory === "all") return true;
+      const typeLower = evt.type.toLowerCase();
+      const refLower = (evt.refId || "").toLowerCase();
+      if (activeCategory === "code") {
+        return typeLower === "commit" || typeLower === "merge" || typeLower === "release" || refLower.includes("commit");
+      }
+      if (activeCategory === "alerts") {
+        return typeLower === "ci_failed" || (evt.severity as string) === "error" || evt.title.toLowerCase().includes("fail");
+      }
+      if (activeCategory === "discussions") {
+        return typeLower === "issue" || typeLower === "issue_created" || typeLower === "issue_updated" || typeLower === "review_requested_changes" || typeLower === "review_approved" || typeLower === "pr_opened" || refLower.includes("issue") || refLower.includes("pr");
+      }
+      if (activeCategory === "deployments") {
+        return typeLower === "release" || evt.title.toLowerCase().includes("deploy") || evt.description.toLowerCase().includes("lambda");
+      }
+      return true;
+    }).length,
+    selectedEventId,
+    isIndexing,
+    errorMessage,
+    activeCategory
+  });
 
   const toggleDiff = (filePath: string) => {
     setExpandedDiff((prev) => ({ ...prev, [filePath]: !prev[filePath] }));
@@ -153,15 +184,37 @@ export default function InteractiveTimeline({
       <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-lg flex flex-col h-[540px]">
         <span className="text-[10px] font-mono font-bold text-slate-500 block mb-3 uppercase tracking-wider border-b border-slate-800 pb-2 flex justify-between items-center">
           <span>Chronological Log</span>
-          <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.2 rounded border border-indigo-500/10">
-            {filteredEvents.length} items shown
-          </span>
+          {isIndexing ? (
+            <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.2 rounded border border-indigo-500/10 animate-pulse">
+              Indexing repository...
+            </span>
+          ) : (
+            <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.2 rounded border border-indigo-500/10">
+              {filteredEvents.length} items shown
+            </span>
+          )}
         </span>
 
         <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-thin">
-          {filteredEvents.length === 0 ? (
+          {isIndexing ? (
+            <div className="flex flex-col items-center justify-center h-full text-indigo-400 text-center text-xs font-mono py-12 p-4">
+              <div className="w-8 h-8 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin mb-3 mx-auto" />
+              <span className="font-semibold text-slate-200">Indexing repository...</span>
+              <p className="text-[10px] text-slate-500 mt-2 max-w-[220px] leading-relaxed mx-auto">
+                Parsing commit trees, classifying work logs, and building vector indexes. This will take just a few seconds.
+              </p>
+            </div>
+          ) : errorMessage ? (
+            <div className="flex flex-col items-center justify-center h-full text-rose-400 text-center text-xs font-mono py-12 p-4">
+              <AlertCircle size={24} className="mb-2 text-rose-500 mx-auto" />
+              <span className="font-semibold text-rose-300">Sync Failure</span>
+              <p className="text-[10px] text-slate-500 mt-2 max-w-[220px] leading-relaxed mx-auto break-words">
+                {errorMessage}
+              </p>
+            </div>
+          ) : filteredEvents.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-600 text-center text-xs font-mono py-12">
-              <AlertCircle size={18} className="mb-2 text-slate-700" />
+              <AlertCircle size={18} className="mb-2 text-slate-700 mx-auto" />
               <span>No events match this scope filter</span>
               <button
                 onClick={() => setActiveCategory("all")}

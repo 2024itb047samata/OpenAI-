@@ -248,6 +248,8 @@ export default function App() {
   const [customRepos, setCustomRepos] = useState<any[]>([]);
   const [selectedCustomRepoId, setSelectedCustomRepoId] = useState<string | null>(null);
   const [customEvents, setCustomEvents] = useState<any[]>([]);
+  const [isIndexing, setIsIndexing] = useState<boolean>(false);
+  const [timelineError, setTimelineError] = useState<string | null>(null);
 
   // Selection states
   const [scenarios] = useState<Scenario[]>(PRESET_SCENARIOS);
@@ -468,6 +470,7 @@ export default function App() {
 
   // Fetch custom timeline events when repository selection changes
   const fetchCustomTimeline = async (repoId: string) => {
+    setTimelineError(null);
     try {
       const [owner, repo] = repoId.split("/");
       const res = await fetch(`/api/repositories/${owner}/${repo}/timeline`);
@@ -477,9 +480,13 @@ export default function App() {
         if (data.length > 0) {
           setSelectedEventId(data[0].id);
         }
+      } else {
+        const data = await res.json();
+        setTimelineError(data.details || data.error || "Failed to load timeline.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load custom repo timeline:", err);
+      setTimelineError(err.message || "Failed to load timeline.");
     }
   };
 
@@ -531,20 +538,30 @@ export default function App() {
   };
 
   const handleAddRepo = async (owner: string, repo: string) => {
-    const res = await fetch("/api/repositories", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ owner, repo })
-    });
-    if (!res.ok) {
+    setIsIndexing(true);
+    setTimelineError(null);
+    try {
+      const res = await fetch("/api/repositories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ owner, repo })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to add repository.");
+      }
       const data = await res.json();
-      throw new Error(data.error || "Failed to add repository.");
+      await fetchCustomRepos();
+      setSelectedCustomRepoId(data.repository.id);
+      setWorkspaceMode("live");
+      await fetchCustomTimeline(data.repository.id);
+      return data.repository;
+    } catch (err: any) {
+      setTimelineError(err.message || "Failed to add repository.");
+      throw err;
+    } finally {
+      setIsIndexing(false);
     }
-    const data = await res.json();
-    await fetchCustomRepos();
-    setSelectedCustomRepoId(data.repository.id);
-    setWorkspaceMode("live");
-    return data.repository;
   };
 
   const handleSaveApiKeyOnBackend = async (key: string) => {
@@ -1036,6 +1053,15 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                       setCurrentPage("timeline");
                     }}
                     selectedCustomRepoId={selectedCustomRepoId}
+                    onIngestStart={() => setIsIndexing(true)}
+                    onIngestEnd={(errorMsg?: string) => {
+                      setIsIndexing(false);
+                      if (errorMsg) {
+                        setTimelineError(errorMsg);
+                      } else {
+                        setTimelineError(null);
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -1100,6 +1126,8 @@ The cleanup routine was actually invoked externally by an AWS Lambda cron job co
                       if (nodeMatch) setSelectedNodeId(nodeMatch.id);
                     }
                   }}
+                  isIndexing={isLiveMode && isIndexing}
+                  errorMessage={isLiveMode ? timelineError : null}
                 />
               </div>
             )}
